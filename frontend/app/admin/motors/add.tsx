@@ -23,6 +23,12 @@ export default function AddMotorScreen() {
   const [form, setForm] = useState({
     modelo: '',
     potencia: '',
+    hp_value: '',
+    tipo: '',
+    cilindrada: '',
+    peso_seco: '',
+    sistema: '',
+    badge_text: 'JAPAN TECH',
     caracteristicas: '',
     precio: '',
     imagen: '',
@@ -61,6 +67,12 @@ export default function AddMotorScreen() {
       await createMotor({
         modelo: form.modelo,
         potencia: form.potencia,
+        hp_value: parseInt(form.hp_value) || 0,
+        tipo: form.tipo,
+        cilindrada: form.cilindrada,
+        peso_seco: form.peso_seco,
+        sistema: form.sistema,
+        badge_text: form.badge_text || 'JAPAN TECH',
         caracteristicas: form.caracteristicas,
         precio: parseFloat(form.precio),
         imagen: form.imagen,
@@ -121,6 +133,67 @@ export default function AddMotorScreen() {
                 value={form.potencia}
                 onChangeText={(text) => setForm({ ...form, potencia: text })}
                 placeholder="Ej: 40 HP"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>HP (número) *</Text>
+              <TextInput
+                style={styles.input}
+                value={form.hp_value}
+                onChangeText={(text) => setForm({ ...form, hp_value: text })}
+                placeholder="Ej: 40"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Tipo</Text>
+              <TextInput
+                style={styles.input}
+                value={form.tipo}
+                onChangeText={(text) => setForm({ ...form, tipo: text })}
+                placeholder="Ej: 4 Tiempos - Inyección Electrónica"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Cilindrada</Text>
+              <TextInput
+                style={styles.input}
+                value={form.cilindrada}
+                onChangeText={(text) => setForm({ ...form, cilindrada: text })}
+                placeholder="Ej: 1995 cc"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Peso seco</Text>
+              <TextInput
+                style={styles.input}
+                value={form.peso_seco}
+                onChangeText={(text) => setForm({ ...form, peso_seco: text })}
+                placeholder="Ej: 186 kg"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Sistema</Text>
+              <TextInput
+                style={styles.input}
+                value={form.sistema}
+                onChangeText={(text) => setForm({ ...form, sistema: text })}
+                placeholder="Ej: EFI"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Texto del Badge</Text>
+              <TextInput
+                style={styles.input}
+                value={form.badge_text}
+                onChangeText={(text) => setForm({ ...form, badge_text: text })}
+                placeholder="Ej: JAPAN TECH"
               />
             </View>
 

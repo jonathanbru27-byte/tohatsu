@@ -9,28 +9,32 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getMotor, Motor } from '@/src/services/api';
+import { getMotor, getConfig, Motor, Configuracion } from '@/src/services/api';
+import ContactModal from '@/src/components/ContactModal';
 
 export default function MotorDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [motor, setMotor] = useState<Motor | null>(null);
+  const [config, setConfig] = useState<Configuracion | null>(null);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    loadMotor();
+    loadData();
   }, [id]);
 
-  const loadMotor = async () => {
+  const loadData = async () => {
     try {
       if (!id) return;
-      const data = await getMotor(id);
-      setMotor(data);
+      const [motorData, configData] = await Promise.all([getMotor(id), getConfig()]);
+      setMotor(motorData);
+      setConfig(configData);
     } catch (error) {
       Alert.alert('Error', 'No se pudo cargar el motor');
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -38,221 +42,360 @@ export default function MotorDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#0066cc" />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#E63946" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (!motor) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Motor no encontrado</Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backText}>Volver</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>Motor no encontrado</Text>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backLinkButton}>
+            <Text style={styles.backLinkText}>Volver</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
-  const calcularCuotaMensual = () => {
-    const montoFinanciado = motor.precio - motor.financiamiento_entrada;
-    return montoFinanciado / motor.financiamiento_cuotas;
-  };
+  const montoFinanciado = motor.precio - motor.financiamiento_entrada;
+  const cuotaMensual = Math.round(montoFinanciado / motor.financiamiento_cuotas);
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={28} color="#fff" />
-      </TouchableOpacity>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerButton} testID="back-button">
+          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Detalle</Text>
+        <TouchableOpacity style={styles.headerButton}>
+          <Ionicons name="heart-outline" size={24} color="#1a1a1a" />
+        </TouchableOpacity>
+      </View>
 
-      <ScrollView>
-        <Image source={{ uri: motor.imagen }} style={styles.motorImage} resizeMode="cover" />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.imageCard}>
+          <Image source={{ uri: motor.imagen }} style={styles.motorImage} resizeMode="cover" />
+          {motor.badge_text ? (
+            <View style={styles.imageBadge}>
+              <Text style={styles.imageBadgeText}>{motor.badge_text}</Text>
+            </View>
+          ) : null}
+        </View>
 
-        <View style={styles.content}>
-          <Text style={styles.modelo}>{motor.modelo}</Text>
-          <Text style={styles.potencia}>{motor.potencia}</Text>
+        <View style={styles.infoSection}>
+          <View style={styles.titleRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.motorTitle}>{motor.modelo}</Text>
+              {motor.tipo ? <Text style={styles.motorSubtitle}>{motor.tipo}</Text> : null}
+            </View>
+            <View style={styles.hpBadge}>
+              <Text style={styles.hpBadgeText}>{motor.potencia}</Text>
+            </View>
+          </View>
+
+          <View style={styles.specsContainer}>
+            <View style={styles.specCard}>
+              <Text style={styles.specLabel}>CILINDRADA</Text>
+              <Text style={styles.specValue}>{motor.cilindrada || '-'}</Text>
+            </View>
+            <View style={styles.specCard}>
+              <Text style={styles.specLabel}>PESO SECO</Text>
+              <Text style={styles.specValue}>{motor.peso_seco || '-'}</Text>
+            </View>
+            <View style={styles.specCard}>
+              <Text style={styles.specLabel}>SISTEMA</Text>
+              <Text style={styles.specValue}>{motor.sistema || '-'}</Text>
+            </View>
+          </View>
+
+          {motor.caracteristicas ? (
+            <View style={styles.descriptionCard}>
+              <Text style={styles.descLabel}>DESCRIPCIÓN</Text>
+              <Text style={styles.descText}>{motor.caracteristicas}</Text>
+            </View>
+          ) : null}
 
           <View style={styles.priceCard}>
-            <Text style={styles.priceLabel}>Precio</Text>
-            <Text style={styles.price}>${motor.precio.toLocaleString()}</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Características</Text>
-            <Text style={styles.caracteristicas}>{motor.caracteristicas}</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Financiamiento</Text>
-            <View style={styles.financingCard}>
-              <View style={styles.financingRow}>
-                <Ionicons name="cash-outline" size={24} color="#0066cc" />
-                <View style={styles.financingInfo}>
-                  <Text style={styles.financingLabel}>Entrada</Text>
-                  <Text style={styles.financingValue}>
-                    ${motor.financiamiento_entrada.toLocaleString()}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.financingRow}>
-                <Ionicons name="calendar-outline" size={24} color="#0066cc" />
-                <View style={styles.financingInfo}>
-                  <Text style={styles.financingLabel}>Cuotas mensuales</Text>
-                  <Text style={styles.financingValue}>
-                    {motor.financiamiento_cuotas} x ${calcularCuotaMensual().toLocaleString('es-ES', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.financingRow}>
-                <Ionicons name="calculator-outline" size={24} color="#0066cc" />
-                <View style={styles.financingInfo}>
-                  <Text style={styles.financingLabel}>Total financiado</Text>
-                  <Text style={styles.financingValue}>
-                    ${(motor.precio - motor.financiamiento_entrada).toLocaleString()}
-                  </Text>
-                </View>
-              </View>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>PRECIO REF.</Text>
+              <Text style={styles.priceValue}>${motor.precio.toLocaleString()} USD</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>ENTRADA</Text>
+              <Text style={styles.priceValueSecondary}>
+                ${motor.financiamiento_entrada.toLocaleString()}
+              </Text>
+            </View>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>CUOTAS ({motor.financiamiento_cuotas} meses)</Text>
+              <Text style={styles.priceQuota}>${cuotaMensual.toLocaleString()}/mes</Text>
             </View>
           </View>
 
           <TouchableOpacity
-            style={styles.contactButton}
-            onPress={() => router.push('/client/contact')}
+            style={styles.cotizarButton}
+            onPress={() => setModalVisible(true)}
+            testID="cotizar-detail-button"
           >
-            <Ionicons name="chatbubbles" size={24} color="#fff" />
-            <Text style={styles.contactButtonText}>Contactar ahora</Text>
+            <Ionicons name="call" size={22} color="#fff" />
+            <Text style={styles.cotizarButtonText}>COTIZAR AHORA</Text>
           </TouchableOpacity>
         </View>
+
+        <View style={{ height: 24 }} />
       </ScrollView>
-    </View>
+
+      <ContactModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title={`Cotización ${motor.modelo}`}
+        phoneNumber={config?.whatsapp_ventas || ''}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F2F2F4',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
-  backButton: {
-    position: 'absolute',
-    top: 48,
-    left: 16,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 24,
-    width: 48,
-    height: 48,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  headerButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1a1a1a',
+  },
+  imageCard: {
+    marginHorizontal: 16,
+    marginBottom: 20,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
   motorImage: {
     width: '100%',
-    height: 300,
-    backgroundColor: '#f0f0f0',
+    height: 260,
+    backgroundColor: '#e0e0e0',
   },
-  content: {
-    padding: 20,
+  imageBadge: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E63946',
   },
-  modelo: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+  imageBadgeText: {
+    color: '#E63946',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
   },
-  potencia: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 24,
+  infoSection: {
+    paddingHorizontal: 16,
   },
-  priceCard: {
-    backgroundColor: '#0066cc',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    gap: 12,
   },
-  priceLabel: {
-    fontSize: 14,
-    color: '#fff',
-    opacity: 0.9,
+  motorTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1a1a1a',
     marginBottom: 4,
   },
-  price: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#fff',
+  motorSubtitle: {
+    fontSize: 13,
+    color: '#888',
+    fontWeight: '500',
   },
-  section: {
-    marginBottom: 24,
+  hpBadge: {
+    backgroundColor: '#FFE5E8',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
+  hpBadgeText: {
+    color: '#E63946',
+    fontSize: 14,
+    fontWeight: '800',
   },
-  caracteristicas: {
-    fontSize: 16,
-    color: '#666',
-    lineHeight: 24,
+  specsContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 8,
+    gap: 4,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  financingCard: {
-    backgroundColor: '#f5f5f5',
+  specCard: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  specLabel: {
+    fontSize: 9,
+    color: '#999',
+    fontWeight: '600',
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  specValue: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1a1a1a',
+  },
+  descriptionCard: {
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
-    gap: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  financingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
+  descLabel: {
+    fontSize: 10,
+    color: '#999',
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    marginBottom: 8,
   },
-  financingInfo: {
-    flex: 1,
-  },
-  financingLabel: {
+  descText: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    color: '#1a1a1a',
+    lineHeight: 22,
+    fontWeight: '500',
   },
-  financingValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  contactButton: {
-    backgroundColor: '#0066cc',
+  priceCard: {
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 18,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  contactButtonText: {
-    color: '#fff',
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 8,
+  },
+  priceLabel: {
+    fontSize: 11,
+    color: '#888',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  priceValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1a1a1a',
+  },
+  priceValueSecondary: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  priceQuota: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '800',
+    color: '#27AE60',
+  },
+  cotizarButton: {
+    backgroundColor: '#E63946',
+    borderRadius: 30,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    shadowColor: '#E63946',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cotizarButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 1.5,
   },
   errorText: {
     fontSize: 18,
     color: '#666',
     marginBottom: 16,
   },
-  backText: {
-    fontSize: 16,
-    color: '#0066cc',
-    fontWeight: '600',
+  backLinkButton: {
+    backgroundColor: '#E63946',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  backLinkText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

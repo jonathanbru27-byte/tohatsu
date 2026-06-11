@@ -28,7 +28,13 @@ export interface Motor {
   id?: string;
   modelo: string;
   potencia: string;
-  caracteristicas: string;
+  hp_value?: number;
+  tipo?: string;
+  cilindrada?: string;
+  peso_seco?: string;
+  sistema?: string;
+  badge_text?: string;
+  caracteristicas?: string;
   precio: number;
   imagen: string;
   financiamiento_entrada: number;
