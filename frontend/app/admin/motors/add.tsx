@@ -37,8 +37,8 @@ export default function AddMotorScreen() {
       return;
     }
 
-    const result = await ImagePicker.launchImagePickerAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.7,

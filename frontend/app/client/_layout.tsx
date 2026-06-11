@@ -49,6 +49,12 @@ export default function ClientLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="motor/[id]"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
