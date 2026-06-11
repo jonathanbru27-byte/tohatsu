@@ -69,20 +69,31 @@ export default function RepuestoForm({ mode }: RepuestoFormProps) {
   };
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permiso requerido', 'Se necesita acceso a tus fotos');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-      base64: true,
-    });
-    if (!result.canceled && result.assets[0].base64) {
-      setForm({ ...form, imagen: `data:image/jpeg;base64,${result.assets[0].base64}` });
+    try {
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permiso requerido', 'Se necesita acceso a tus fotos');
+          return;
+        }
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.6,
+        base64: true,
+      });
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        if (Platform.OS === 'web' && asset.uri && asset.uri.startsWith('data:')) {
+          setForm({ ...form, imagen: asset.uri });
+        } else if (asset.base64) {
+          setForm({ ...form, imagen: `data:image/jpeg;base64,${asset.base64}` });
+        }
+      }
+    } catch {
+      Alert.alert('Error', 'No se pudo seleccionar la imagen');
     }
   };
 
