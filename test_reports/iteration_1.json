@@ -1,0 +1,41 @@
+{
+  "summary": "RCA + fix verified: the reported 'blank white screen on /client' was caused by Metro running in CI mode (CI=true) which disables file watching / hot reload. The browser was being served a stale bundle from an earlier broken state. After `sudo supervisorctl restart expo` the new bundle is built and ALL routes render correctly: / (home), /client (red HOLA CATALOGO placeholder), /client/calendar (2 events from API), /client/contact (3 contact cards), /admin/login (form works), /admin/dashboard (renders after login with admin/admin123). Backend integration is working — calendar fetches events, login authenticates successfully and navigates to dashboard. No console pageerrors, no red screen. Deprecation warnings detected: 'shadow*' style props and props.pointerEvents (cosmetic React Native Web warnings only).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "app/client/index.tsx", "issue": "Currently a debug placeholder ('HOLA CATALOGO' red view). The real catalog (motor list with images/prices/financing) needs to be restored. Reference: /app/frontend/app/client/index.tsx", "testID": "n/a", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/client (catalog)", "issues": ["Catalog screen is stub-only; no list of motors, no images, no prices, no financing UI. PRD requires catalog UI."]},
+      {"screen": "/client/* navigation", "issues": ["client/_layout.tsx uses Stack — the prior build (and PRD-implied UX) used a bottom Tab navigator (Catálogo / Calendario / Contacto). Currently there is no way for the end-user to navigate between catalog, calendar and contact from inside /client. Reference: /app/frontend/app/client/_layout.tsx"]}
+    ],
+    "react_native_issues": [
+      {"component": "StyleSheet (multiple files)", "issue": "'shadow*' style props are deprecated in react-native-web; should migrate to boxShadow (cosmetic warning, repeated in console)."},
+      {"component": "react-native-web", "issue": "props.pointerEvents is deprecated; use style.pointerEvents."},
+      {"component": "package versions", "issue": "Expo doctor reports incompatible versions: @react-native-async-storage/async-storage@3.1.1 (expected 2.2.0), expo-image-picker@56.0.17 (expected ~17.0.11), expo-linear-gradient@56.0.4 (expected ~15.0.8), react-native-safe-area-context@5.8.0 (expected ~5.6.0), react-native-screens@4.25.2 (expected ~4.16.0). Reference: /var/log/supervisor/expo.err.log"}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Restore the real catalog UI in /app/frontend/app/client/index.tsx (FlatList of motors with image, modelo, potencia, precio, financiamiento, navigation to /client/motor/[id]).",
+    "Change /app/frontend/app/client/_layout.tsx from Stack to Tabs (expo-router Tabs) so users can switch between Catálogo, Calendario, Contacto — matches the original UX and the previous (cached) build.",
+    "After ANY code edit, run `sudo supervisorctl restart expo` because Metro runs with CI=true (no hot reload). DO NOT rely on file changes being picked up automatically in this preview environment.",
+    "Optionally migrate deprecated 'shadow*' props to boxShadow and pointerEvents to style.pointerEvents to silence warnings.",
+    "Run `npx expo install --fix` to align package versions with expo SDK 54 (or report to E1 to upgrade)."
+  ],
+  "critical_code_review_comments": [
+    "api.ts uses EXPO_PUBLIC_BACKEND_URL correctly (good).",
+    "AuthContext stores JWT in AsyncStorage and authenticates via /api/auth/login — verified working end-to-end (login → dashboard).",
+    "client/_layout.tsx is a plain Stack — does not provide the tab navigation required by PRD.",
+    "client/index.tsx is debug placeholder; production catalog code is missing.",
+    "Interactive elements (login button, contact cards) lack testID attributes — should be added for robust automated testing."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only request)", "frontend": "100% of routes render; catalog screen content is stub"},
+  "seed_data_creation": "None (3 motors and 2 calendar events already seeded in MongoDB).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "After main agent restores catalog UI and switches client layout to Tabs, restart expo (`sudo supervisorctl restart expo`) and verify /client shows motor list, tab bar at bottom (Catálogo/Calendario/Contacto), and tapping a motor navigates to /client/motor/[id]. Also verify admin CRUD pages (/admin/motors, /admin/calendar, /admin/config). admin/admin123 confirmed working.",
+  "rca_of_issue": "Root cause of blank white screen on /client: Metro bundler is started with CI=true (visible in expo logs: 'Metro is running in CI mode, reloads are disabled'). When E1 edited client/_layout.tsx and client/index.tsx during debugging, Metro did NOT rebuild — the browser was served the previous broken bundle (the build that had the SafeAreaProvider/GestureHandlerRootView/Tabs experiments). Reproduction: edit any file under /app/frontend/app/client/ → reload browser → see old broken bundle. Mitigation: run `sudo supervisorctl restart expo` after every code change. After restart, /client and all sub-routes render correctly. Confirmed by visiting /client (red HOLA CATALOGO), /client/calendar (events list), /client/contact (3 cards), /admin/login → /admin/dashboard (admin/admin123 success)."
+}
