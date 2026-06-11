@@ -124,4 +124,35 @@ export const updateConfig = async (config: Configuracion): Promise<Configuracion
   return response.data;
 };
 
+export interface Repuesto {
+  id?: string;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  imagen?: string;
+  categoria?: string;
+  stock?: number;
+}
+
+// Repuestos
+export const getRepuestos = async (): Promise<Repuesto[]> => {
+  const response = await api.get('/repuestos');
+  return response.data;
+};
+
+export const createRepuesto = async (repuesto: Omit<Repuesto, 'id'>): Promise<Repuesto> => {
+  const response = await api.post('/repuestos', repuesto);
+  return response.data;
+};
+
+export const updateRepuesto = async (id: string, repuesto: Omit<Repuesto, 'id'>): Promise<Repuesto> => {
+  const response = await api.put(`/repuestos/${id}`, repuesto);
+  return response.data;
+};
+
+export const deleteRepuesto = async (id: string) => {
+  const response = await api.delete(`/repuestos/${id}`);
+  return response.data;
+};
+
 export default api;

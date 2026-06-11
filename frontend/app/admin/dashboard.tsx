@@ -31,6 +31,14 @@ export default function DashboardScreen() {
       color: '#0066cc',
     },
     {
+      id: 'repuestos',
+      title: 'Gestionar Repuestos',
+      description: 'Agregar, editar o eliminar repuestos con imagen y descripción',
+      icon: 'construct' as const,
+      route: '/admin/repuestos',
+      color: '#0A1F44',
+    },
+    {
       id: 'calendar',
       title: 'Gestionar Calendario',
       description: 'Programar eventos de mantenimiento gratuito',
