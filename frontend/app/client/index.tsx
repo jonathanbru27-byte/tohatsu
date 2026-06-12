@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   motorImage: {
     width: '100%',
-    height: 200,
+    aspectRatio: 4 / 5,
     backgroundColor: '#e0e0e0',
   },
   imageBadge: {

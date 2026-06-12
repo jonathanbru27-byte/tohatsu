@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
   featuredImage: {
     width: '100%',
-    height: 120,
+    aspectRatio: 4 / 5,
     backgroundColor: '#e0e0e0',
   },
   featuredHpBadge: {

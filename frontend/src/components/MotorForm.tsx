@@ -86,7 +86,7 @@ export default function MotorForm({ mode }: MotorFormProps) {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [4, 5],
         quality: 0.6,
         base64: true,
       });
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
   imageSelector: {
     width: '100%',
-    height: 200,
+    aspectRatio: 4 / 5,
     borderRadius: 14,
     overflow: 'hidden',
     marginBottom: 20,
