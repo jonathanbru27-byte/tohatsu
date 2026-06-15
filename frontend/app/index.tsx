@@ -41,7 +41,7 @@ export default function HomeScreen() {
         {/* Navy Header with Logo */}
         <View style={styles.navyHeader}>
           <View style={styles.logoContainer}>
-            <TohatsuLogo size={64} showTagline color="white" />
+            <TohatsuLogo size={64} color="white" />
           </View>
           <Text style={styles.heroSubtitle}>MOTORES FUERA DE BORDA</Text>
           <Text style={styles.heroTitle}>Calidad Japonesa</Text>
