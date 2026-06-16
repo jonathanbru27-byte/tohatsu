@@ -11,22 +11,29 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getMotors, Motor } from '@/src/services/api';
+import { getMotors, getCalendar, Motor, CalendarioEvento } from '@/src/services/api';
 import CustomTabBar from '@/src/components/CustomTabBar';
 
 export default function HomeScreen() {
   const router = useRouter();
   const [motors, setMotors] = useState<Motor[]>([]);
+  const [eventos, setEventos] = useState<CalendarioEvento[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadMotors();
+    loadData();
   }, []);
 
-  const loadMotors = async () => {
+  const loadData = async () => {
     try {
-      const data = await getMotors();
-      setMotors(data.slice(0, 3));
+      const [motorsData, eventosData] = await Promise.all([getMotors(), getCalendar()]);
+      setMotors(motorsData.slice(0, 3));
+      // Filtrar próximos (futuros) y ordenar cronológicamente
+      const today = new Date().toISOString().split('T')[0];
+      const upcoming = eventosData
+        .filter((e) => e.fecha >= today)
+        .sort((a, b) => a.fecha.localeCompare(b.fecha));
+      setEventos(upcoming);
     } catch (error) {
       console.error(error);
     } finally {
@@ -62,6 +69,72 @@ export default function HomeScreen() {
             <Text style={styles.heroButtonText}>EXPLORAR CATÁLOGO</Text>
             <Ionicons name="arrow-forward" size={18} color="#fff" />
           </TouchableOpacity>
+
+          {/* Próximas Campañas de Mantenimiento */}
+          {eventos.length > 0 && (
+            <View style={styles.campaignsSection}>
+              <View style={styles.campaignsHeader}>
+                <Ionicons name="megaphone" size={16} color="#E63946" />
+                <Text style={styles.campaignsHeaderText}>PRÓXIMAS CAMPAÑAS GRATUITAS</Text>
+              </View>
+              {eventos.slice(0, 3).map((ev, idx) => (
+                <TouchableOpacity
+                  key={ev.id}
+                  style={[styles.campaignCard, idx === 0 && styles.campaignCardFeatured]}
+                  onPress={() => router.push('/client/calendar')}
+                  testID={`campaign-${ev.id}`}
+                >
+                  <View style={styles.campaignDateBox}>
+                    <Text style={styles.campaignDay}>
+                      {ev.fecha.split('-')[2] || '--'}
+                    </Text>
+                    <Text style={styles.campaignMonth}>
+                      {['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][
+                        parseInt(ev.fecha.split('-')[1] || '1', 10) - 1
+                      ] || ''}
+                    </Text>
+                  </View>
+                  <View style={styles.campaignBody}>
+                    {ev.titulo ? (
+                      <Text style={styles.campaignTitle} numberOfLines={1}>
+                        {ev.titulo}
+                      </Text>
+                    ) : (
+                      <Text style={styles.campaignTitle} numberOfLines={1}>
+                        Mantenimiento Gratuito
+                      </Text>
+                    )}
+                    <View style={styles.campaignMetaRow}>
+                      {ev.hora ? (
+                        <>
+                          <Ionicons name="time-outline" size={11} color="#B8C5DB" />
+                          <Text style={styles.campaignMeta}>{ev.hora}</Text>
+                          <View style={styles.dotSep} />
+                        </>
+                      ) : null}
+                      <Ionicons name="location-outline" size={11} color="#B8C5DB" />
+                      <Text style={styles.campaignMeta} numberOfLines={1}>
+                        {ev.localidad}
+                      </Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color="#B8C5DB" />
+                </TouchableOpacity>
+              ))}
+              {eventos.length > 3 && (
+                <TouchableOpacity
+                  style={styles.viewAllBtn}
+                  onPress={() => router.push('/client/calendar')}
+                  testID="view-all-campaigns"
+                >
+                  <Text style={styles.viewAllText}>
+                    Ver todas las campañas ({eventos.length})
+                  </Text>
+                  <Ionicons name="arrow-forward" size={14} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Body */}
@@ -218,6 +291,96 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginBottom: 24,
+  },
+  campaignsSection: {
+    marginTop: 24,
+  },
+  campaignsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  campaignsHeaderText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#E63946',
+    letterSpacing: 1.5,
+  },
+  campaignCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 14,
+    padding: 12,
+    gap: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  campaignCardFeatured: {
+    backgroundColor: 'rgba(230, 57, 70, 0.15)',
+    borderColor: 'rgba(230, 57, 70, 0.4)',
+  },
+  campaignDateBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: '#E63946',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  campaignDay: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#fff',
+    lineHeight: 24,
+  },
+  campaignMonth: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 1,
+  },
+  campaignBody: {
+    flex: 1,
+  },
+  campaignTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  campaignMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flexWrap: 'wrap',
+  },
+  campaignMeta: {
+    fontSize: 11,
+    color: '#B8C5DB',
+    fontWeight: '500',
+  },
+  dotSep: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#B8C5DB',
+    marginHorizontal: 4,
+  },
+  viewAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    marginTop: 4,
+  },
+  viewAllText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '700',
   },
   heroSubtitle: {
     fontSize: 11,

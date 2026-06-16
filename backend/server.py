@@ -65,12 +65,16 @@ class MotorCreate(BaseModel):
 
 class CalendarioEvento(BaseModel):
     id: Optional[str] = None
+    titulo: str = ""
     fecha: str
+    hora: str = ""
     localidad: str
     descripcion: str
 
 class CalendarioEventoCreate(BaseModel):
+    titulo: str = ""
     fecha: str
+    hora: str = ""
     localidad: str
     descripcion: str
 
@@ -234,7 +238,7 @@ async def delete_motor(motor_id: str, current_user: dict = Depends(get_current_u
 
 @api_router.get("/calendar", response_model=List[CalendarioEvento])
 async def get_calendar():
-    eventos = await db.calendario.find().to_list(1000)
+    eventos = await db.calendario.find().sort("fecha", 1).to_list(1000)
     return [CalendarioEvento(id=str(e["_id"]), **{k: v for k, v in e.items() if k != "_id"}) for e in eventos]
 
 @api_router.post("/calendar", response_model=CalendarioEvento)

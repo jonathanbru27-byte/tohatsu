@@ -43,7 +43,9 @@ export interface Motor {
 
 export interface CalendarioEvento {
   id?: string;
+  titulo?: string;
   fecha: string;
+  hora?: string;
   localidad: string;
   descripcion: string;
 }
