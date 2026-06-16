@@ -13,7 +13,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getMotors, Motor } from '@/src/services/api';
 import CustomTabBar from '@/src/components/CustomTabBar';
-import TohatsuLogo from '@/src/components/TohatsuLogo';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -37,12 +36,19 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Fixed Compact Navbar */}
+      <View style={styles.navbar} testID="top-navbar">
+        <Image
+          source={{ uri: 'https://customer-assets.emergentagent.com/job_outboard-dealer-app/artifacts/xhb5qngr_images.jpg' }}
+          style={styles.navbarLogo}
+          resizeMode="contain"
+        />
+        <Text style={styles.navbarBrand}>TOHATSU</Text>
+      </View>
+
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
-        {/* Navy Header with Logo */}
+        {/* Hero Section (sin logo grande) */}
         <View style={styles.navyHeader}>
-          <View style={styles.logoContainer}>
-            <TohatsuLogo size={64} color="white" />
-          </View>
           <Text style={styles.heroSubtitle}>MOTORES FUERA DE BORDA</Text>
           <Text style={styles.heroTitle}>Calidad Japonesa</Text>
           <Text style={styles.heroDescription}>
@@ -177,16 +183,34 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1F44',
+    backgroundColor: '#0a1628',
   },
   scroll: {
     flex: 1,
     backgroundColor: '#F2F2F4',
   },
+  navbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0a1628',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  navbarLogo: {
+    width: 32,
+    height: 32,
+  },
+  navbarBrand: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+  },
   navyHeader: {
-    backgroundColor: '#0A1F44',
+    backgroundColor: '#0a1628',
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 32,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
