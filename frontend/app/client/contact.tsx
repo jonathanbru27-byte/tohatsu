@@ -164,6 +164,8 @@ export default function ContactScreen() {
         onClose={() => setModalVisible(false)}
         title={modalData.title}
         phoneNumber={modalData.phone}
+        interes={modalType === 'ventas' ? 'motor' : modalType === 'repuestos' ? 'repuesto' : 'servicio'}
+        detalle={modalData.title}
       />
     </SafeAreaView>
   );

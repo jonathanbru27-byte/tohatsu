@@ -1,10 +1,12 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import io
 from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -12,6 +14,7 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from bson import ObjectId
+from openpyxl import Workbook
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -99,6 +102,34 @@ class RepuestoCreate(BaseModel):
     imagen: str = ""
     categoria: str = "General"
     stock: int = 0
+
+class Asesor(BaseModel):
+    id: Optional[str] = None
+    nombre: str
+    whatsapp: str
+    provincia: str  # Manabí, Santa Elena, Esmeraldas, Guayas
+
+class AsesorCreate(BaseModel):
+    nombre: str
+    whatsapp: str
+    provincia: str
+
+class Lead(BaseModel):
+    id: Optional[str] = None
+    fecha: str
+    hora: str
+    nombre: str = ""
+    telefono: str = ""
+    provincia: str = ""
+    interes: str  # motor / repuesto / servicio
+    detalle: str = ""
+
+class LeadCreate(BaseModel):
+    nombre: str = ""
+    telefono: str = ""
+    provincia: str = ""
+    interes: str
+    detalle: str = ""
 
 class AdminLogin(BaseModel):
     username: str
@@ -327,6 +358,111 @@ async def delete_repuesto(repuesto_id: str, current_user: dict = Depends(get_cur
         return {"message": "Repuesto eliminado"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+# ==================== ASESORES ====================
+
+def asesor_to_dict(a):
+    return Asesor(id=str(a["_id"]), **{k: v for k, v in a.items() if k != "_id"})
+
+@api_router.get("/asesores", response_model=List[Asesor])
+async def get_asesores():
+    asesores = await db.asesores.find().to_list(1000)
+    return [asesor_to_dict(a) for a in asesores]
+
+@api_router.post("/asesores", response_model=Asesor)
+async def create_asesor(asesor: AsesorCreate, current_user: dict = Depends(get_current_user)):
+    ad = asesor.dict()
+    result = await db.asesores.insert_one(ad)
+    ad["id"] = str(result.inserted_id)
+    return Asesor(**ad)
+
+@api_router.put("/asesores/{asesor_id}", response_model=Asesor)
+async def update_asesor(asesor_id: str, asesor: AsesorCreate, current_user: dict = Depends(get_current_user)):
+    try:
+        ad = asesor.dict()
+        await db.asesores.update_one({"_id": ObjectId(asesor_id)}, {"$set": ad})
+        ad["id"] = asesor_id
+        return Asesor(**ad)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.delete("/asesores/{asesor_id}")
+async def delete_asesor(asesor_id: str, current_user: dict = Depends(get_current_user)):
+    try:
+        result = await db.asesores.delete_one({"_id": ObjectId(asesor_id)})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Asesor no encontrado")
+        return {"message": "Asesor eliminado"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.get("/asesores/by-provincia/{provincia}")
+async def get_asesor_by_provincia(provincia: str):
+    asesor = await db.asesores.find_one({"provincia": provincia})
+    if not asesor:
+        # Fallback al número general de ventas
+        config = await db.configuracion.find_one({})
+        if config:
+            return {"nombre": "Asesor General", "whatsapp": config.get("whatsapp_ventas", ""), "provincia": "General", "is_general": True}
+        raise HTTPException(status_code=404, detail="No hay asesor disponible")
+    return {**asesor_to_dict(asesor).dict(), "is_general": False}
+
+# ==================== LEADS ====================
+
+@api_router.get("/leads", response_model=List[Lead])
+async def get_leads(current_user: dict = Depends(get_current_user)):
+    leads = await db.leads.find().sort("fecha", -1).to_list(10000)
+    return [Lead(id=str(l["_id"]), **{k: v for k, v in l.items() if k != "_id"}) for l in leads]
+
+@api_router.post("/leads", response_model=Lead)
+async def create_lead(lead: LeadCreate):
+    now = datetime.now()
+    lead_dict = lead.dict()
+    lead_dict["fecha"] = now.strftime("%Y-%m-%d")
+    lead_dict["hora"] = now.strftime("%H:%M:%S")
+    result = await db.leads.insert_one(lead_dict)
+    lead_dict["id"] = str(result.inserted_id)
+    return Lead(**lead_dict)
+
+@api_router.get("/leads/export/xlsx")
+async def export_leads_xlsx(current_user: dict = Depends(get_current_user)):
+    leads = await db.leads.find().sort("fecha", -1).to_list(100000)
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Leads Tohatsu"
+    headers = ["Fecha", "Hora", "Nombre", "Teléfono", "Provincia", "Interés", "Detalle"]
+    ws.append(headers)
+    # Estilo header
+    from openpyxl.styles import Font, PatternFill, Alignment
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill(start_color="0A1628", end_color="0A1628", fill_type="solid")
+    for col_idx, _ in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    for l in leads:
+        ws.append([
+            l.get("fecha", ""),
+            l.get("hora", ""),
+            l.get("nombre", ""),
+            l.get("telefono", ""),
+            l.get("provincia", ""),
+            l.get("interes", ""),
+            l.get("detalle", ""),
+        ])
+    # Ancho de columnas
+    widths = [12, 10, 22, 18, 16, 12, 40]
+    for i, w in enumerate(widths, start=1):
+        ws.column_dimensions[chr(64 + i)].width = w
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=leads_tohatsu.xlsx"},
+    )
 
 app.include_router(api_router)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])

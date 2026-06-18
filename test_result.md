@@ -261,7 +261,91 @@ backend:
         agent: "testing"
         comment: "Database seeding working correctly. Admin user (admin/admin123) created on startup. Default configuration created with WhatsApp numbers. Seed function is idempotent (doesn't duplicate data on restart)."
 
+  - task: "Asesores CRUD"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Endpoints implemented: GET/POST/PUT/DELETE /api/asesores and GET /api/asesores/by-provincia/{provincia} (with fallback to whatsapp_ventas). Manual curl test passed."
+
+  - task: "Leads tracking + Excel export"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Endpoints implemented: POST /api/leads (public), GET /api/leads (auth), GET /api/leads/export/xlsx (auth, returns xlsx file via openpyxl). Manual curl tests pass: lead created with fecha/hora, xlsx returns 200 OK with correct mime."
+
 frontend:
+  - task: "ContactModal with Provincia chips + lead tracking"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ContactModal.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Rewrote ContactModal to ask Nombre + Teléfono + Provincia (12 chips: Manabí, Guayas, El Oro, Esmeraldas, Santa Elena, Los Ríos, Sucumbíos, Orellana, Napo, Pastaza, Morona Santiago, Zamora Chinchipe). On submit: POST /api/leads, fetch asesor by provincia, open wa.me URL. Verified UI in browser."
+
+  - task: "Motor detail UI - remove cuotas"
+    implemented: true
+    working: true
+    file: "/app/frontend/app/client/motor/[id].tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Removed CUOTAS row from price card. Now shows only PRECIO REF. + ENTRADA MÍNIMA. Verified visually."
+
+  - task: "Catalog cards - remove cuotas"
+    implemented: true
+    working: true
+    file: "/app/frontend/app/client/index.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Replaced 'CUOTA $X/mes' with 'ENTRADA MÍN. $X' in catalog cards. Verified visually."
+
+  - task: "Admin Asesores CRUD UI"
+    implemented: true
+    working: true
+    file: "/app/frontend/app/admin/asesores/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created list, add and edit screens for Asesores. Provincia is chosen via chip selector. Wired into admin dashboard. Visually verified."
+
+  - task: "Admin Download Leads (Excel)"
+    implemented: true
+    working: true
+    file: "/app/frontend/app/admin/dashboard.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added a prominent red 'Descargar Leads (Excel)' button in admin dashboard. Uses fetch with Authorization bearer; on web triggers blob download, on native saves to cache via expo-file-system and opens expo-sharing share sheet."
+
   - task: "Frontend Testing"
     implemented: true
     working: "NA"

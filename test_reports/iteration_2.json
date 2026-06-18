@@ -1,0 +1,53 @@
+{
+  "summary": "Backend-only regression + new endpoints (asesores, leads, xlsx export) for Tohatsu Motors. All 26 pytest tests passed (100%). Verified: admin login (admin/admin123 → Bearer JWT), asesores CRUD with auth enforcement (403 without token via HTTPBearer), GET /api/asesores public, by-provincia behaviour (is_general:false on match, is_general:true with whatsapp_ventas fallback), leads creation without auth with server-filled fecha=YYYY-MM-DD/hora=HH:MM:SS, leads listing requires auth, /api/leads/export/xlsx returns valid xlsx (PK header, correct Content-Type, attachment Content-Disposition) with exact header row [Fecha, Hora, Nombre, Teléfono, Provincia, Interés, Detalle]. Regression on motors/calendar/repuestos/config all green. No critical or minor backend issues found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/leads", "issue": "interes field is free-text — no enum validation (motor/repuesto/servicio). Server accepts any string. Consider adding a Literal/Enum on Pydantic LeadCreate.interes."},
+      {"endpoint": "POST/PUT/DELETE protected routes", "issue": "HTTPBearer returns 403 (not 401) when Authorization header is missing. This is FastAPI default behaviour and acceptable, but PRD wording said '403 without token' which matches current implementation."},
+      {"endpoint": "POST /api/asesores", "issue": "No uniqueness constraint on provincia: multiple asesores can be created for the same provincia and by-provincia/{provincia} will only return the first match via find_one. Consider unique index or list-based response."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/conftest.py",
+    "/app/backend/tests/test_health_auth.py",
+    "/app/backend/tests/test_asesores.py",
+    "/app/backend/tests/test_leads.py",
+    "/app/backend/tests/test_regression.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Constrain Lead.interes to Literal['motor','repuesto','servicio'] in Pydantic for input validation.",
+    "(Optional) Add unique index on asesores.provincia or return list from /api/asesores/by-provincia/{provincia} when multiple asesores per provincia are allowed.",
+    "(Note) Lead documents created by tests remain in DB (created via no-auth POST /api/leads with TEST_ prefix). They are intentionally kept so the xlsx export has data; main agent may purge if desired."
+  ],
+  "critical_code_review_comments": [
+    "server.py is 480 lines — still manageable but split into routers/ (asesores.py, leads.py, motors.py, calendar.py, repuestos.py, auth.py) is recommended before it grows further.",
+    "All endpoints correctly use /api prefix via APIRouter — good.",
+    "Mongo _id is correctly excluded from all responses via {k:v ... if k != '_id'} pattern.",
+    "Generic try/except blocks return 400 with str(e) — that leaks internal error messages. Prefer specific HTTPExceptions with friendly messages.",
+    "SECRET_KEY is hardcoded in server.py — should be moved to env var before production.",
+    "Lead.fecha and Lead.hora are server-generated correctly via datetime.now() inside POST /api/leads.",
+    "openpyxl xlsx export correctly streams via StreamingResponse with proper media-type and Content-Disposition."
+  ],
+  "updated_files": [
+    "/app/backend/tests/__init__.py (new)",
+    "/app/backend/tests/conftest.py (new)",
+    "/app/backend/tests/test_health_auth.py (new)",
+    "/app/backend/tests/test_asesores.py (new)",
+    "/app/backend/tests/test_leads.py (new)",
+    "/app/backend/tests/test_regression.py (new)"
+  ],
+  "success_rate": {"backend": "100% (26/26)", "frontend": "N/A (not requested)"},
+  "seed_data_creation": "Tests create TEST_-prefixed asesores/motors/calendar/repuestos and clean them up. Leads are intentionally kept (3 created: TEST_Cliente_Lead/Manabí/motor, TEST_R/Guayas/repuesto, TEST_S/El Oro/servicio) so xlsx export verification has data.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Pytest suite is at /app/backend/tests/. Re-run with: pytest /app/backend/tests/ -v --tb=short --junitxml=/app/test_reports/pytest/pytest_results.xml. BASE_URL is read from EXPO_PUBLIC_BACKEND_URL in /app/frontend/.env (EXPO_BACKEND_URL is not set). admin/admin123 confirmed working. Note: openpyxl is required (pip install openpyxl) for xlsx parsing — already present in /root/.venv (it is also listed in backend imports).",
+  "rca_of_issue": "N/A — no failures observed."
+}

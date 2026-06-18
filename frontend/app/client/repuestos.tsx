@@ -8,13 +8,13 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getRepuestos, getConfig, Repuesto, Configuracion } from '@/src/services/api';
 import CustomTabBar from '@/src/components/CustomTabBar';
+import ContactModal from '@/src/components/ContactModal';
 
 const CATEGORIA_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   Filtros: 'funnel',
@@ -34,6 +34,8 @@ export default function RepuestosScreen() {
   const [config, setConfig] = useState<Configuracion | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedRepuesto, setSelectedRepuesto] = useState<Repuesto | null>(null);
 
   useEffect(() => {
     loadData();
@@ -58,10 +60,8 @@ export default function RepuestosScreen() {
   };
 
   const handleCotizar = (repuesto: Repuesto) => {
-    if (!config) return;
-    const message = `Hola! Quisiera cotizar este repuesto:\n\n*${repuesto.nombre}*\nPrecio referencia: $${repuesto.precio}\nCategoría: ${repuesto.categoria}`;
-    const url = `https://wa.me/${config.whatsapp_repuestos}?text=${encodeURIComponent(message)}`;
-    Linking.openURL(url).catch(() => Alert.alert('Error', 'No se pudo abrir WhatsApp'));
+    setSelectedRepuesto(repuesto);
+    setModalVisible(true);
   };
 
   const renderRepuesto = ({ item }: { item: Repuesto }) => {
@@ -133,6 +133,20 @@ export default function RepuestosScreen() {
       )}
 
       <CustomTabBar />
+
+      {selectedRepuesto && (
+        <ContactModal
+          visible={modalVisible}
+          onClose={() => {
+            setModalVisible(false);
+            setSelectedRepuesto(null);
+          }}
+          title={`Repuesto: ${selectedRepuesto.nombre}`}
+          phoneNumber={config?.whatsapp_repuestos || ''}
+          interes="repuesto"
+          detalle={`${selectedRepuesto.nombre} - $${selectedRepuesto.precio} (${selectedRepuesto.categoria || 'General'})`}
+        />
+      )}
     </SafeAreaView>
   );
 }

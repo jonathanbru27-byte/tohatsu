@@ -63,9 +63,6 @@ export default function MotorDetailScreen() {
     );
   }
 
-  const montoFinanciado = motor.precio - motor.financiamiento_entrada;
-  const cuotaMensual = Math.round(montoFinanciado / motor.financiamiento_cuotas);
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -128,14 +125,10 @@ export default function MotorDetailScreen() {
             </View>
             <View style={styles.divider} />
             <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>ENTRADA</Text>
+              <Text style={styles.priceLabel}>ENTRADA MÍNIMA</Text>
               <Text style={styles.priceValueSecondary}>
                 ${motor.financiamiento_entrada.toLocaleString()}
               </Text>
-            </View>
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>CUOTAS ({motor.financiamiento_cuotas} meses)</Text>
-              <Text style={styles.priceQuota}>${cuotaMensual.toLocaleString()}/mes</Text>
             </View>
           </View>
 
@@ -157,6 +150,8 @@ export default function MotorDetailScreen() {
         onClose={() => setModalVisible(false)}
         title={`Cotización ${motor.modelo}`}
         phoneNumber={config?.whatsapp_ventas || ''}
+        interes="motor"
+        detalle={`Motor: ${motor.modelo} (${motor.potencia}) - Precio ref. $${motor.precio.toLocaleString()}`}
       />
     </SafeAreaView>
   );

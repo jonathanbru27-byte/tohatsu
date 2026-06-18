@@ -157,4 +157,75 @@ export const deleteRepuesto = async (id: string) => {
   return response.data;
 };
 
+// ==================== ASESORES ====================
+export interface Asesor {
+  id?: string;
+  nombre: string;
+  whatsapp: string;
+  provincia: string;
+}
+
+export interface AsesorAsignado {
+  nombre: string;
+  whatsapp: string;
+  provincia: string;
+  is_general: boolean;
+}
+
+export const PROVINCIAS = [
+  'Manabí',
+  'Guayas',
+  'El Oro',
+  'Esmeraldas',
+  'Santa Elena',
+  'Los Ríos',
+  'Sucumbíos',
+  'Orellana',
+  'Napo',
+  'Pastaza',
+  'Morona Santiago',
+  'Zamora Chinchipe',
+] as const;
+
+export const getAsesores = async (): Promise<Asesor[]> => {
+  const response = await api.get('/asesores');
+  return response.data;
+};
+
+export const createAsesor = async (asesor: Omit<Asesor, 'id'>): Promise<Asesor> => {
+  const response = await api.post('/asesores', asesor);
+  return response.data;
+};
+
+export const updateAsesor = async (id: string, asesor: Omit<Asesor, 'id'>): Promise<Asesor> => {
+  const response = await api.put(`/asesores/${id}`, asesor);
+  return response.data;
+};
+
+export const deleteAsesor = async (id: string) => {
+  const response = await api.delete(`/asesores/${id}`);
+  return response.data;
+};
+
+export const getAsesorByProvincia = async (provincia: string): Promise<AsesorAsignado> => {
+  const response = await api.get(`/asesores/by-provincia/${encodeURIComponent(provincia)}`);
+  return response.data;
+};
+
+// ==================== LEADS ====================
+export interface LeadCreate {
+  nombre: string;
+  telefono: string;
+  provincia: string;
+  interes: string;
+  detalle?: string;
+}
+
+export const createLead = async (lead: LeadCreate) => {
+  const response = await api.post('/leads', lead);
+  return response.data;
+};
+
+export const getLeadsExportUrl = () => `${API_URL}/leads/export/xlsx`;
+
 export default api;

@@ -60,11 +60,6 @@ export default function MotoresScreen() {
     return unique;
   }, [motors]);
 
-  const calcularCuota = (motor: Motor) => {
-    const monto = motor.precio - motor.financiamiento_entrada;
-    return Math.round(monto / motor.financiamiento_cuotas);
-  };
-
   const handleCotizar = (motor: Motor) => {
     setSelectedMotor(motor);
     setModalVisible(true);
@@ -171,13 +166,13 @@ export default function MotoresScreen() {
         {/* Prices */}
         <View style={styles.priceRow}>
           <View>
-            <Text style={styles.priceLabel}>PRECIO</Text>
+            <Text style={styles.priceLabel}>PRECIO REF.</Text>
             <Text style={styles.priceValue}>${item.precio.toLocaleString()}</Text>
           </View>
           <View style={styles.priceSeparator} />
           <View>
-            <Text style={styles.priceLabel}>CUOTA</Text>
-            <Text style={styles.priceQuota}>${calcularCuota(item).toLocaleString()}/mes</Text>
+            <Text style={styles.priceLabel}>ENTRADA MÍN.</Text>
+            <Text style={styles.priceQuota}>${item.financiamiento_entrada.toLocaleString()}</Text>
           </View>
         </View>
 
@@ -270,6 +265,12 @@ export default function MotoresScreen() {
         onClose={() => setModalVisible(false)}
         title={selectedMotor ? `Cotización ${selectedMotor.modelo}` : 'Cotización'}
         phoneNumber={config?.whatsapp_ventas || ''}
+        interes="motor"
+        detalle={
+          selectedMotor
+            ? `Motor: ${selectedMotor.modelo} (${selectedMotor.potencia}) - Precio ref. $${selectedMotor.precio.toLocaleString()}`
+            : ''
+        }
       />
     </SafeAreaView>
   );
