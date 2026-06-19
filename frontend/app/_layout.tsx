@@ -6,6 +6,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useIconFonts } from "@/src/hooks/use-icon-fonts";
 import { AuthProvider } from '@/src/contexts/AuthContext';
+import PWAInstallPrompt from '@/src/components/PWAInstallPrompt';
+import { usePWA } from '@/src/hooks/usePWA';
 
 // Keep the native splash visible from cold start until icon fonts register.
 // Required because @expo/vector-icons' componentDidMount fallback fires
@@ -15,6 +17,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useIconFonts();
+  usePWA();
 
   useEffect(() => {
     if (loaded || error) {
@@ -30,6 +33,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <AuthProvider>
         <Stack screenOptions={{ headerShown: false }} />
+        <PWAInstallPrompt />
       </AuthProvider>
     </SafeAreaProvider>
   );
