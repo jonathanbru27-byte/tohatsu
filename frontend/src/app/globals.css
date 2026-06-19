@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    height: 100%;
+  }
+  body {
+    background-color: #0a1628;
+    color: #0A1F44;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Avoid blue tap highlight on iOS */
+  * { -webkit-tap-highlight-color: transparent; }
+  /* Hide scrollbars on the horizontal swiper */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  /* PWA: respect safe areas */
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-red px-5 py-3 text-sm font-extrabold tracking-wide text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-navy px-5 py-3 text-sm font-extrabold tracking-wide text-white transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-brand-navy ring-1 ring-slate-200 transition hover:bg-slate-50;
+  }
+  .card {
+    @apply rounded-2xl bg-white shadow-sm ring-1 ring-slate-100;
+  }
+  .input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[15px] text-slate-900 outline-none placeholder:text-slate-400 focus:border-brand-red/60 focus:ring-2 focus:ring-brand-red/15;
+  }
+  .label {
+    @apply text-[11px] font-extrabold uppercase tracking-[0.1em] text-brand-navy;
+  }
+  .section-title {
+    @apply flex items-center gap-3;
+  }
+  .section-title::before {
+    content: '';
+    @apply h-[3px] w-6 rounded bg-brand-red;
+  }
+}
+
+/* App container limits width on desktop to feel mobile-like */
+.app-shell {
+  margin-inline: auto;
+  max-width: 480px;
+  min-height: 100dvh;
+  background-color: #F2F2F4;
+  position: relative;
+  overflow-x: hidden;
+}
+@media (min-width: 481px) {
+  body {
+    background: #0a1628;
+  }
+  .app-shell {
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+  }
+}

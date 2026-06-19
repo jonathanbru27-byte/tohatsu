@@ -1,56 +1,31 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import Image from 'next/image';
+import { LOGO_URL } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
-const LOGO_URL =
-  'https://customer-assets.emergentagent.com/job_outboard-dealer-app/artifacts/xhb5qngr_images.jpg';
-
-interface TohatsuLogoProps {
+interface Props {
   size?: number;
   color?: 'navy' | 'white';
+  className?: string;
 }
 
-export default function TohatsuLogo({ size = 80, color = 'navy' }: TohatsuLogoProps) {
-  const mainColor = color === 'navy' ? '#0A1F44' : '#ffffff';
-
+export function TohatsuLogo({ size = 32, color = 'navy', className }: Props) {
+  const textColor = color === 'navy' ? 'text-brand-navy' : 'text-white';
   return (
-    <View style={styles.container}>
-      <View style={[styles.logoRow, { gap: size * 0.18 }]}>
-        <Image
-          source={{ uri: LOGO_URL }}
-          style={{
-            width: size,
-            height: size,
-            resizeMode: 'contain',
-          }}
-        />
-        <Text
-          style={[
-            styles.brandText,
-            {
-              fontSize: size * 0.55,
-              color: mainColor,
-              letterSpacing: size * 0.02,
-            },
-          ]}
-        >
-          TOHATSU
-        </Text>
-      </View>
-    </View>
+    <div className={cn('flex items-center gap-2.5', className)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={LOGO_URL}
+        alt="Tohatsu"
+        width={size}
+        height={size}
+        style={{ width: size, height: size, objectFit: 'contain' }}
+      />
+      <span
+        className={cn('font-black tracking-widest', textColor)}
+        style={{ fontSize: size * 0.55 }}
+      >
+        TOHATSU
+      </span>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  brandText: {
-    fontWeight: '900',
-    fontFamily: 'System',
-  },
-});
