@@ -82,9 +82,10 @@ memory/test_credentials.md
 android-sdk/frontend/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
 frontend/node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
 frontend/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
-.env
-.env.*
-*.env
+# .env files - kept for deployment
+# .env
+# .env.*
+# *.env
 credentials.json
 *.key
 .credentials
