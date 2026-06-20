@@ -10,7 +10,7 @@ import sys
 from typing import Optional
 
 # Backend URL from environment
-BASE_URL = "https://outboard-dealer-app.preview.emergentagent.com/api"
+BASE_URL = "https://outboard-motors.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_USERNAME = "admin"

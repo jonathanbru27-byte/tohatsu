@@ -395,8 +395,8 @@ Localidad: {localidad}
 ## 14. URLs de Acceso
 
 ### 14.1 Producción
-- **Frontend**: https://outboard-dealer-app.preview.emergentagent.com
-- **Backend API**: https://outboard-dealer-app.preview.emergentagent.com/api
+- **Frontend**: https://outboard-motors.preview.emergentagent.com
+- **Backend API**: https://outboard-motors.preview.emergentagent.com/api
 
 ### 14.2 Desarrollo Local
 - **Frontend**: http://localhost:3000

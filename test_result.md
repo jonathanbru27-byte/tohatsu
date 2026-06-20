@@ -363,7 +363,7 @@ metadata:
   version: "1.0"
   test_sequence: 1
   run_ui: false
-  backend_url: "https://outboard-dealer-app.preview.emergentagent.com/api"
+  backend_url: "https://outboard-motors.preview.emergentagent.com/api"
   test_date: "2026-06-11"
   total_backend_tests: 16
   backend_tests_passed: 16
