@@ -42,6 +42,29 @@ export default function HomePage() {
           <ArrowRight size={16} />
         </Link>
 
+        {/* Tarjeta Campaña Mantenimiento Gratuito */}
+        <Link 
+          href="/client/calendar" 
+          className="mt-4 flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-3 transition hover:bg-white/15"
+          data-testid="maintenance-campaign-card"
+        >
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-400/20">
+            <Calendar size={24} className="text-sky-300" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-extrabold text-white">Mantenimiento Gratuito</p>
+            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-brand-slate">
+              <Clock size={10} />
+              <span>Sábado 28 Jun · 9:00 AM</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-brand-slate">
+              <MapPin size={10} />
+              <span>Marina Club Náutico</span>
+            </div>
+          </div>
+          <ChevronRight size={18} className="text-sky-300" />
+        </Link>
+
         {/* Campañas */}
         {eventos.length > 0 && (
           <div className="mt-6">
