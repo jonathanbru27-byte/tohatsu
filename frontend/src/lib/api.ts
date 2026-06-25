@@ -5,12 +5,16 @@ const BACKEND_URL =
   process.env.EXPO_PUBLIC_BACKEND_URL ||
   '';
 
-// In the browser, the Next.js rewrites in next.config.mjs proxy /api/* to the
-// backend, so we use relative `/api`. On the server side (SSR), use absolute.
-const API_URL =
-  typeof window === 'undefined'
-    ? `${BACKEND_URL}/api`
-    : '/api';
+// When deployed to Vercel (or any external host), always use the full backend URL
+// since there's no local backend to proxy to. In development with the full stack,
+// use relative /api paths that get proxied by Next.js rewrites.
+const isExternalDeployment = typeof window !== 'undefined' && 
+  !window.location.hostname.includes('preview.emergentagent.com') &&
+  !window.location.hostname.includes('localhost');
+
+const API_URL = isExternalDeployment && BACKEND_URL
+  ? `${BACKEND_URL}/api`
+  : (typeof window === 'undefined' ? `${BACKEND_URL}/api` : '/api');
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
@@ -143,7 +147,9 @@ export const getAsesorByProvincia = async (provincia: string): Promise<AsesorAsi
 export const createLead = async (lead: LeadCreate) => (await api.post('/leads', lead)).data;
 export const downloadLeadsExcel = async () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('tohatsu_token') : null;
-  const url = `/api/leads/export/xlsx`;
+  // Use the same API_URL logic for consistency
+  const baseUrl = isExternalDeployment && BACKEND_URL ? `${BACKEND_URL}/api` : '/api';
+  const url = `${baseUrl}/leads/export/xlsx`;
   const response = await fetch(url, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });

@@ -291,6 +291,21 @@ backend:
         agent: "testing"
         comment: "All Leads endpoints tested successfully. POST /api/leads (public, no auth) creates lead with automatic fecha/hora timestamp. GET /api/leads (requires auth) returns all leads sorted by fecha descending. GET /api/leads/export/xlsx (requires auth) exports leads to Excel file with correct content-type (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) and valid Excel format (ZIP signature verified). GET /api/leads without auth correctly returns 403 Forbidden. All endpoints working as expected."
 
+  - task: "API Connectivity for External Deployment (Vercel)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/lib/api.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Modified /app/frontend/src/lib/api.ts to detect external deployments (not on preview.emergentagent.com or localhost) and use the full backend URL instead of relative /api paths. Backend URL: https://outboard-motors.preview.emergentagent.com/api. User needs to configure NEXT_PUBLIC_BACKEND_URL in Vercel environment variables."
+      - working: true
+        agent: "testing"
+        comment: "API connectivity fix verified successfully. Created test_api_connectivity.py to test backend accessibility and CORS configuration. All 5 tests passed: Backend Health Check ✅ (backend accessible at https://outboard-motors.preview.emergentagent.com/api), CORS Preflight ✅ (Access-Control-Allow-Origin: *), GET /api/motors ✅ (returns 8 motors with CORS headers), GET /api/calendar ✅ (returns events with CORS headers), GET /api/config ✅ (returns configuration with CORS headers). Frontend fix logic verified: isExternalDeployment correctly detects non-preview.emergentagent.com and non-localhost deployments, uses full backend URL when NEXT_PUBLIC_BACKEND_URL is set. Backend CORS properly configured with allow_origins=['*']. Backend is ready for external deployment. User must set NEXT_PUBLIC_BACKEND_URL=https://outboard-motors.preview.emergentagent.com in Vercel environment variables."
+
 frontend:
   - task: "ContactModal with Provincia chips + lead tracking"
     implemented: true
@@ -385,12 +400,12 @@ frontend:
 metadata:
   created_by: "testing_agent"
   version: "1.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
   backend_url: "https://outboard-motors.preview.emergentagent.com/api"
   test_date: "2026-06-25"
-  total_backend_tests: 27
-  backend_tests_passed: 27
+  total_backend_tests: 32
+  backend_tests_passed: 32
   backend_tests_failed: 0
 
 test_plan:
@@ -410,3 +425,5 @@ agent_communication:
     message: "Backend testing completed for Asesores CRUD and Leads tracking features. Extended backend_test.py with 11 new tests (7 for Asesores, 4 for Leads). All 27 backend tests passed (100% success rate). Asesores CRUD: All endpoints working correctly including GET, POST, PUT, DELETE, and by-provincia lookup with fallback. Leads tracking: Public lead creation, authenticated lead retrieval, Excel export with valid XLSX format, and proper auth validation all working. Frontend navbar fix: Code review completed - fix logic is correct (showText prop prevents duplication), but visual testing not performed as frontend testing is outside testing agent scope. Backend is fully functional and production-ready."
   - agent: "testing"
     message: "DEPLOYMENT VERIFICATION COMPLETED (2026-06-25): All deployment fixes verified and working correctly. Backend API health check: All 27 tests passed (100% success rate). Specific endpoints tested: GET /api/motors ✅, GET /api/calendar ✅, POST /api/auth/login (admin/admin123) ✅, GET /api/config ✅. seed_motors.py fix verified: Script successfully uses MONGO_URL and DB_NAME environment variables, connected to MongoDB, and seeded 8 motors. All backend endpoints responding correctly via production URL (https://outboard-motors.preview.emergentagent.com/api). No critical issues found. Backend is deployment-ready and fully functional."
+  - agent: "testing"
+    message: "API CONNECTIVITY FIX FOR VERCEL DEPLOYMENT VERIFIED (2026-06-25): Tested the API connectivity fix applied to /app/frontend/src/lib/api.ts for external deployment (Vercel at tohatsu-exan.vercel.app). Created test_api_connectivity.py to verify backend accessibility and CORS configuration. All 5 tests passed (100% success rate): ✅ Backend Health Check - Backend accessible and responding at https://outboard-motors.preview.emergentagent.com/api, ✅ CORS Preflight - CORS properly configured with Access-Control-Allow-Origin: *, ✅ GET /api/motors - Returns 8 motors with CORS headers, ✅ GET /api/calendar - Returns calendar events with CORS headers, ✅ GET /api/config - Returns configuration with CORS headers. Frontend fix logic verified: isExternalDeployment detection correctly identifies non-preview.emergentagent.com and non-localhost deployments, uses full backend URL when NEXT_PUBLIC_BACKEND_URL is set. Backend is ready for external deployment. User must configure NEXT_PUBLIC_BACKEND_URL=https://outboard-motors.preview.emergentagent.com in Vercel environment variables for the fix to work."
