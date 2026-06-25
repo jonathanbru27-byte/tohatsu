@@ -144,9 +144,9 @@ def seed_motors():
     print(f"Conectando a MongoDB: {MONGO_URL[:50]}...")
     
     try:
-        # Usar MongoDB local
-        client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=5000)
-        db = client["test_database"]
+        # Usar MongoDB desde variable de entorno
+        client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
+        db = client[DB_NAME]
         
         # Verificar conexión
         client.admin.command('ping')
