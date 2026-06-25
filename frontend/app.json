@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Tohatsu Motors EC",
+    "slug": "tohatsu-motors",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/icon.png",
+    "scheme": "tohatsu",
+    "userInterfaceStyle": "automatic",
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./public/favicon.ico"
+    },
+    "platforms": ["web"],
+    "extra": {
+      "eas": {
+        "projectId": "tohatsu-motors"
+      }
+    }
+  }
+}
