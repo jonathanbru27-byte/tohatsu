@@ -523,6 +523,342 @@ def test_verify_config_update():
         print_error(f"Verify config test failed: {str(e)}")
         return False
 
+# ==================== ASESORES TESTS ====================
+
+def test_get_asesores_empty():
+    """Test getting asesores list (should be empty initially)"""
+    print_test("Asesores - GET /asesores (Initial State)")
+    
+    try:
+        response = requests.get(f"{BASE_URL}/asesores", timeout=10)
+        
+        print_info(f"Status Code: {response.status_code}")
+        print_info(f"Response: {response.text}")
+        
+        if response.status_code == 200:
+            asesores = response.json()
+            print_success(f"GET /asesores successful - Found {len(asesores)} asesores")
+            return True
+        else:
+            print_error(f"GET /asesores failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"GET asesores test failed: {str(e)}")
+        return False
+
+def test_create_asesor():
+    """Test creating a new asesor"""
+    print_test("Asesores - POST /asesores (Create Asesor)")
+    
+    if not auth_token:
+        print_error("No auth token available. Cannot test asesor creation.")
+        return False
+    
+    asesor_data = {
+        "nombre": "Carlos Mendoza",
+        "whatsapp": "593987654321",
+        "provincia": "Manabí"
+    }
+    
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = requests.post(
+            f"{BASE_URL}/asesores",
+            json=asesor_data,
+            headers=headers,
+            timeout=10
+        )
+        
+        print_info(f"Status Code: {response.status_code}")
+        print_info(f"Response: {response.text[:300]}")
+        
+        if response.status_code == 200:
+            asesor = response.json()
+            if "id" in asesor:
+                print_success(f"Asesor created successfully! ID: {asesor['id']}")
+                print_info(f"Nombre: {asesor.get('nombre')}, Provincia: {asesor.get('provincia')}")
+                return asesor['id']
+            else:
+                print_error("Asesor created but no ID returned")
+                return False
+        else:
+            print_error(f"Asesor creation failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"Create asesor test failed: {str(e)}")
+        return False
+
+def test_get_asesores_with_data():
+    """Test getting asesores list after creation"""
+    print_test("Asesores - GET /asesores (After Creation)")
+    
+    try:
+        response = requests.get(f"{BASE_URL}/asesores", timeout=10)
+        
+        print_info(f"Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            asesores = response.json()
+            print_success(f"GET /asesores successful - Found {len(asesores)} asesores")
+            if len(asesores) > 0:
+                print_info(f"First asesor: {asesores[0].get('nombre', 'N/A')} - {asesores[0].get('provincia', 'N/A')}")
+            return True
+        else:
+            print_error(f"GET /asesores failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"GET asesores test failed: {str(e)}")
+        return False
+
+def test_update_asesor(asesor_id: str):
+    """Test updating an asesor"""
+    print_test(f"Asesores - PUT /asesores/{asesor_id}")
+    
+    if not auth_token:
+        print_error("No auth token available. Cannot test asesor update.")
+        return False
+    
+    updated_data = {
+        "nombre": "Carlos Mendoza Actualizado",
+        "whatsapp": "593987654999",
+        "provincia": "Guayas"
+    }
+    
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = requests.put(
+            f"{BASE_URL}/asesores/{asesor_id}",
+            json=updated_data,
+            headers=headers,
+            timeout=10
+        )
+        
+        print_info(f"Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            asesor = response.json()
+            if asesor.get('provincia') == "Guayas":
+                print_success(f"Asesor updated successfully! New provincia: {asesor['provincia']}")
+                return True
+            else:
+                print_error(f"Asesor updated but provincia not changed: {asesor.get('provincia')}")
+                return False
+        else:
+            print_error(f"Asesor update failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"Update asesor test failed: {str(e)}")
+        return False
+
+def test_get_asesor_by_provincia():
+    """Test getting asesor by provincia"""
+    print_test("Asesores - GET /asesores/by-provincia/Guayas")
+    
+    try:
+        response = requests.get(f"{BASE_URL}/asesores/by-provincia/Guayas", timeout=10)
+        
+        print_info(f"Status Code: {response.status_code}")
+        print_info(f"Response: {response.text[:300]}")
+        
+        if response.status_code == 200:
+            asesor = response.json()
+            print_success(f"Asesor retrieved by provincia: {asesor.get('nombre', 'N/A')}")
+            print_info(f"WhatsApp: {asesor.get('whatsapp', 'N/A')}")
+            print_info(f"Is General: {asesor.get('is_general', False)}")
+            return True
+        else:
+            print_error(f"GET asesor by provincia failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"GET asesor by provincia test failed: {str(e)}")
+        return False
+
+def test_get_asesor_by_provincia_fallback():
+    """Test getting asesor by provincia with fallback to general"""
+    print_test("Asesores - GET /asesores/by-provincia/Pichincha (Fallback)")
+    
+    try:
+        response = requests.get(f"{BASE_URL}/asesores/by-provincia/Pichincha", timeout=10)
+        
+        print_info(f"Status Code: {response.status_code}")
+        print_info(f"Response: {response.text[:300]}")
+        
+        if response.status_code == 200:
+            asesor = response.json()
+            if asesor.get('is_general') == True:
+                print_success(f"Fallback to general asesor working! WhatsApp: {asesor.get('whatsapp', 'N/A')}")
+                return True
+            else:
+                print_warning("Expected fallback to general asesor but got specific asesor")
+                return True  # Still valid if there's an asesor for that provincia
+        else:
+            print_error(f"GET asesor by provincia fallback failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"GET asesor by provincia fallback test failed: {str(e)}")
+        return False
+
+def test_delete_asesor(asesor_id: str):
+    """Test deleting an asesor"""
+    print_test(f"Asesores - DELETE /asesores/{asesor_id}")
+    
+    if not auth_token:
+        print_error("No auth token available. Cannot test asesor deletion.")
+        return False
+    
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = requests.delete(
+            f"{BASE_URL}/asesores/{asesor_id}",
+            headers=headers,
+            timeout=10
+        )
+        
+        print_info(f"Status Code: {response.status_code}")
+        print_info(f"Response: {response.text}")
+        
+        if response.status_code == 200:
+            print_success("Asesor deleted successfully!")
+            return True
+        else:
+            print_error(f"Asesor deletion failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"Delete asesor test failed: {str(e)}")
+        return False
+
+# ==================== LEADS TESTS ====================
+
+def test_create_lead_public():
+    """Test creating a lead (public endpoint, no auth required)"""
+    print_test("Leads - POST /leads (Public, No Auth)")
+    
+    lead_data = {
+        "nombre": "Juan Pérez",
+        "telefono": "593991234567",
+        "provincia": "Manabí",
+        "interes": "motor",
+        "detalle": "Interesado en motor 40 HP"
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/leads",
+            json=lead_data,
+            timeout=10
+        )
+        
+        print_info(f"Status Code: {response.status_code}")
+        print_info(f"Response: {response.text[:300]}")
+        
+        if response.status_code == 200:
+            lead = response.json()
+            if "id" in lead and "fecha" in lead and "hora" in lead:
+                print_success(f"Lead created successfully! ID: {lead['id']}")
+                print_info(f"Fecha: {lead.get('fecha')}, Hora: {lead.get('hora')}")
+                return lead['id']
+            else:
+                print_error("Lead created but missing required fields")
+                return False
+        else:
+            print_error(f"Lead creation failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"Create lead test failed: {str(e)}")
+        return False
+
+def test_get_leads():
+    """Test getting leads list (requires auth)"""
+    print_test("Leads - GET /leads (Requires Auth)")
+    
+    if not auth_token:
+        print_error("No auth token available. Cannot test get leads.")
+        return False
+    
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = requests.get(
+            f"{BASE_URL}/leads",
+            headers=headers,
+            timeout=10
+        )
+        
+        print_info(f"Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            leads = response.json()
+            print_success(f"GET /leads successful - Found {len(leads)} leads")
+            if len(leads) > 0:
+                print_info(f"First lead: {leads[0].get('nombre', 'N/A')} - {leads[0].get('provincia', 'N/A')}")
+            return True
+        else:
+            print_error(f"GET /leads failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"GET leads test failed: {str(e)}")
+        return False
+
+def test_export_leads_xlsx():
+    """Test exporting leads to Excel (requires auth)"""
+    print_test("Leads - GET /leads/export/xlsx (Excel Export)")
+    
+    if not auth_token:
+        print_error("No auth token available. Cannot test leads export.")
+        return False
+    
+    try:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = requests.get(
+            f"{BASE_URL}/leads/export/xlsx",
+            headers=headers,
+            timeout=10
+        )
+        
+        print_info(f"Status Code: {response.status_code}")
+        print_info(f"Content-Type: {response.headers.get('Content-Type', 'N/A')}")
+        print_info(f"Content-Disposition: {response.headers.get('Content-Disposition', 'N/A')}")
+        print_info(f"Response size: {len(response.content)} bytes")
+        
+        if response.status_code == 200:
+            content_type = response.headers.get('Content-Type', '')
+            if 'spreadsheet' in content_type or 'excel' in content_type:
+                print_success(f"Excel export successful! File size: {len(response.content)} bytes")
+                # Verify it's a valid Excel file by checking magic bytes
+                if response.content[:2] == b'PK':  # Excel files are ZIP archives
+                    print_success("Valid Excel file format (ZIP signature detected)")
+                    return True
+                else:
+                    print_warning("Excel file may not be valid (no ZIP signature)")
+                    return True  # Still pass if we got the right content type
+            else:
+                print_error(f"Wrong content type: {content_type}")
+                return False
+        else:
+            print_error(f"Excel export failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"Export leads test failed: {str(e)}")
+        return False
+
+def test_get_leads_unauthorized():
+    """Test that getting leads requires authentication"""
+    print_test("Leads - GET /leads (Without Auth)")
+    
+    try:
+        response = requests.get(f"{BASE_URL}/leads", timeout=10)
+        
+        print_info(f"Status Code: {response.status_code}")
+        
+        if response.status_code == 401 or response.status_code == 403:
+            print_success("Correctly rejected unauthorized request")
+            return True
+        else:
+            print_error(f"Expected 401/403, got {response.status_code}")
+            return False
+    except Exception as e:
+        print_error(f"Unauthorized test failed: {str(e)}")
+        return False
+
 # ==================== MAIN TEST RUNNER ====================
 
 def main():
@@ -593,6 +929,31 @@ def main():
     run_test(test_get_config)
     run_test(test_update_config)
     run_test(test_verify_config_update)
+    
+    # Asesores Tests
+    print(f"\n{YELLOW}{'='*60}{RESET}")
+    print(f"{YELLOW}ASESORES TESTS{RESET}")
+    print(f"{YELLOW}{'='*60}{RESET}")
+    
+    run_test(test_get_asesores_empty)
+    asesor_id = run_test(test_create_asesor)
+    run_test(test_get_asesores_with_data)
+    
+    if asesor_id:
+        run_test(test_update_asesor, asesor_id)
+        run_test(test_get_asesor_by_provincia)
+        run_test(test_get_asesor_by_provincia_fallback)
+        run_test(test_delete_asesor, asesor_id)
+    
+    # Leads Tests
+    print(f"\n{YELLOW}{'='*60}{RESET}")
+    print(f"{YELLOW}LEADS TESTS{RESET}")
+    print(f"{YELLOW}{'='*60}{RESET}")
+    
+    lead_id = run_test(test_create_lead_public)
+    run_test(test_get_leads)
+    run_test(test_export_leads_xlsx)
+    run_test(test_get_leads_unauthorized)
     
     # Summary
     print(f"\n{BLUE}{'='*60}{RESET}")

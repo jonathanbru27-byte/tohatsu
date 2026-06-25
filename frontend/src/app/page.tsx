@@ -25,110 +25,113 @@ export default function HomePage() {
 
   return (
     <div className="min-h-full bg-brand-bg">
-      {/* Sticky navbar */}
-      <header className="sticky top-0 z-20 flex items-center gap-3 bg-brand-navydark px-4 py-2.5" data-testid="top-navbar">
-        <TohatsuLogo size={32} color="white" />
-      </header>
+      <div className="bg-brand-navydark rounded-b-[28px]">
+        <div className="sticky top-0 z-20 px-3 pt-3 pb-2">
+          <header 
+            className="flex items-center gap-2.5 rounded-full bg-white px-4 py-2.5 shadow-lg shadow-black/15" 
+            data-testid="top-navbar"
+          >
+            <TohatsuLogo size={28} color="navy" showText={false} />
+            <span className="text-[15px] font-black tracking-wide text-brand-navy">TOHATSU EC.</span>
+          </header>
+        </div>
 
-      {/* Hero */}
-      <section className="rounded-b-[28px] bg-brand-navydark px-6 pb-8 pt-4 text-white">
-        <p className="text-[11px] font-extrabold tracking-[0.2em] text-brand-red">MOTORES FUERA DE BORDA</p>
-        <h1 className="mt-2 text-[30px] font-black leading-tight">Calidad Japonesa</h1>
-        <p className="mt-2 text-[13px] leading-relaxed text-brand-slate">
-          Más de 60 años de innovación marina al servicio de tu navegación
-        </p>
-        <Link href="/client" className="btn-primary mt-4" data-testid="hero-explore-button">
-          EXPLORAR CATÁLOGO
-          <ArrowRight size={16} />
-        </Link>
+        <div className="px-6 pb-8 pt-3 text-white">
+          <p className="text-[11px] font-extrabold tracking-[0.2em] text-brand-red">MOTORES FUERA DE BORDA</p>
+          <h1 className="mt-2 text-[30px] font-black leading-tight">Calidad Japonesa</h1>
+          <p className="mt-2 text-[13px] leading-relaxed text-brand-slate">
+            Más de 60 años de innovación marina al servicio de tu navegación
+          </p>
+          <Link href="/client" className="btn-primary mt-4" data-testid="hero-explore-button">
+            EXPLORAR CATÁLOGO
+            <ArrowRight size={16} />
+          </Link>
 
-        {/* Tarjeta Campaña Mantenimiento Gratuito */}
-        <Link 
-          href="/client/calendar" 
-          className="mt-4 flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-3 transition hover:bg-white/15"
-          data-testid="maintenance-campaign-card"
-        >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-400/20">
-            <Calendar size={24} className="text-sky-300" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-extrabold text-white">Mantenimiento Gratuito</p>
-            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-brand-slate">
-              <Clock size={10} />
-              <span>Sábado 28 Jun · 9:00 AM</span>
+          <Link 
+            href="/client/calendar" 
+            className="mt-4 flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-3 transition hover:bg-white/15"
+            data-testid="maintenance-campaign-card"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-400/20">
+              <Calendar size={24} className="text-sky-300" />
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-brand-slate">
-              <MapPin size={10} />
-              <span>Marina Club Náutico</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-extrabold text-white">Mantenimiento Gratuito</p>
+              <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-brand-slate">
+                <Clock size={10} />
+                <span>Sábado 28 Jun · 9:00 AM</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-brand-slate">
+                <MapPin size={10} />
+                <span>Marina Club Náutico</span>
+              </div>
             </div>
-          </div>
-          <ChevronRight size={18} className="text-sky-300" />
-        </Link>
+            <ChevronRight size={18} className="text-sky-300" />
+          </Link>
 
-        {/* Campañas */}
-        {eventos.length > 0 && (
-          <div className="mt-6">
-            <div className="mb-3 flex items-center gap-2">
-              <Megaphone size={14} className="text-brand-red" />
-              <span className="text-[11px] font-extrabold tracking-[0.15em] text-brand-red">
-                PRÓXIMAS CAMPAÑAS GRATUITAS
-              </span>
-            </div>
-            <div className="space-y-2">
-              {eventos.slice(0, 3).map((ev, idx) => {
-                const [_, m, d] = ev.fecha.split('-');
-                const month = MES_NAMES_SHORT[parseInt(m, 10) - 1] || '';
-                return (
-                  <Link
-                    key={ev.id}
-                    href="/client/calendar"
-                    className={cn(
-                      'flex items-center gap-3 rounded-2xl border p-3 transition',
-                      idx === 0
-                        ? 'border-brand-red/40 bg-brand-red/15 hover:bg-brand-red/20'
-                        : 'border-white/10 bg-white/8 hover:bg-white/12'
-                    )}
-                    data-testid={`campaign-${ev.id}`}
-                  >
-                    <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-red">
-                      <span className="text-[22px] font-black leading-none text-white">{d}</span>
-                      <span className="mt-0.5 text-[10px] font-extrabold tracking-wider text-white">{month}</span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-extrabold text-white">{ev.titulo || 'Mantenimiento Gratuito'}</p>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-brand-slate">
-                        {ev.hora && (
-                          <>
-                            <Clock size={11} />
-                            <span>{ev.hora}</span>
-                            <span className="h-1 w-1 rounded-full bg-brand-slate" />
-                          </>
-                        )}
-                        <MapPin size={11} />
-                        <span className="truncate">{ev.localidad}</span>
+          {eventos.length > 0 && (
+            <div className="mt-6">
+              <div className="mb-3 flex items-center gap-2">
+                <Megaphone size={14} className="text-brand-red" />
+                <span className="text-[11px] font-extrabold tracking-[0.15em] text-brand-red">
+                  PRÓXIMAS CAMPAÑAS GRATUITAS
+                </span>
+              </div>
+              <div className="space-y-2">
+                {eventos.slice(0, 3).map((ev, idx) => {
+                  const [_, m, d] = ev.fecha.split('-');
+                  const month = MES_NAMES_SHORT[parseInt(m, 10) - 1] || '';
+                  return (
+                    <Link
+                      key={ev.id}
+                      href="/client/calendar"
+                      className={cn(
+                        'flex items-center gap-3 rounded-2xl border p-3 transition',
+                        idx === 0
+                          ? 'border-brand-red/40 bg-brand-red/15 hover:bg-brand-red/20'
+                          : 'border-white/10 bg-white/8 hover:bg-white/12'
+                      )}
+                      data-testid={`campaign-${ev.id}`}
+                    >
+                      <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-red">
+                        <span className="text-[22px] font-black leading-none text-white">{d}</span>
+                        <span className="mt-0.5 text-[10px] font-extrabold tracking-wider text-white">{month}</span>
                       </div>
-                    </div>
-                    <ChevronRight size={18} className="text-brand-slate" />
-                  </Link>
-                );
-              })}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[14px] font-extrabold text-white">{ev.titulo || 'Mantenimiento Gratuito'}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-brand-slate">
+                          {ev.hora && (
+                            <>
+                              <Clock size={11} />
+                              <span>{ev.hora}</span>
+                              <span className="h-1 w-1 rounded-full bg-brand-slate" />
+                            </>
+                          )}
+                          <MapPin size={11} />
+                          <span className="truncate">{ev.localidad}</span>
+                        </div>
+                      </div>
+                      <ChevronRight size={18} className="text-brand-slate" />
+                    </Link>
+                  );
+                })}
+              </div>
+              {eventos.length > 3 && (
+                <Link
+                  href="/client/calendar"
+                  className="mt-2 flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-white hover:underline"
+                  data-testid="view-all-campaigns"
+                >
+                  Ver todas las campañas ({eventos.length})
+                  <ArrowRight size={14} />
+                </Link>
+              )}
             </div>
-            {eventos.length > 3 && (
-              <Link
-                href="/client/calendar"
-                className="mt-2 flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-white hover:underline"
-                data-testid="view-all-campaigns"
-              >
-                Ver todas las campañas ({eventos.length})
-                <ArrowRight size={14} />
-              </Link>
-            )}
-          </div>
-        )}
-      </section>
+          )}
+        </div>
+      </div>
 
-      {/* Body */}
-      <section className="px-4 pt-6">
+      <section className="bg-brand-bg px-4 pt-6">
         <div className="section-title">
           <span className="text-[13px] font-extrabold tracking-widest text-brand-navy">ACCIONES RÁPIDAS</span>
         </div>
@@ -152,7 +155,6 @@ export default function HomePage() {
           })}
         </div>
 
-        {/* Banner repuestos */}
         <Link
           href="/client/repuestos"
           className="mt-5 flex items-center gap-3.5 rounded-2xl bg-brand-navy p-4 shadow-lg shadow-blue-900/25 transition hover:brightness-110"
@@ -170,7 +172,6 @@ export default function HomePage() {
           </div>
         </Link>
 
-        {/* Featured motors */}
         <div className="section-title mt-7">
           <span className="text-[13px] font-extrabold tracking-widest text-brand-navy">MODELOS DESTACADOS</span>
         </div>

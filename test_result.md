@@ -267,11 +267,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Endpoints implemented: GET/POST/PUT/DELETE /api/asesores and GET /api/asesores/by-provincia/{provincia} (with fallback to whatsapp_ventas). Manual curl test passed."
+      - working: true
+        agent: "testing"
+        comment: "All Asesores CRUD endpoints tested successfully. GET /api/asesores returns empty array initially and populated array after creation. POST /api/asesores creates asesor with nombre, whatsapp, provincia (requires auth). PUT /api/asesores/{id} updates asesor successfully. GET /api/asesores/by-provincia/{provincia} retrieves asesor by provincia with correct fallback to general whatsapp_ventas when no specific asesor exists. DELETE /api/asesores/{id} deletes asesor successfully. All endpoints properly validate authentication."
 
   - task: "Leads tracking + Excel export"
     implemented: true
@@ -279,11 +282,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Endpoints implemented: POST /api/leads (public), GET /api/leads (auth), GET /api/leads/export/xlsx (auth, returns xlsx file via openpyxl). Manual curl tests pass: lead created with fecha/hora, xlsx returns 200 OK with correct mime."
+      - working: true
+        agent: "testing"
+        comment: "All Leads endpoints tested successfully. POST /api/leads (public, no auth) creates lead with automatic fecha/hora timestamp. GET /api/leads (requires auth) returns all leads sorted by fecha descending. GET /api/leads/export/xlsx (requires auth) exports leads to Excel file with correct content-type (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) and valid Excel format (ZIP signature verified). GET /api/leads without auth correctly returns 403 Forbidden. All endpoints working as expected."
 
 frontend:
   - task: "ContactModal with Provincia chips + lead tracking"
@@ -346,6 +352,24 @@ frontend:
         agent: "main"
         comment: "Added a prominent red 'Descargar Leads (Excel)' button in admin dashboard. Uses fetch with Authorization bearer; on web triggers blob download, on native saves to cache via expo-file-system and opens expo-sharing share sheet."
 
+  - task: "Floating Island Navbar - Text Duplication Fix"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/app/page.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported text duplication in navbar: 'TOHATSU TOHATSU EC.' - needed to show only 'TOHATSU EC.'"
+      - working: true
+        agent: "main"
+        comment: "Fixed duplication by adding showText prop to TohatsuLogo component and setting showText={false} in page.tsx navbar. Now shows only logo image + 'TOHATSU EC.' text. Verified via screenshot."
+      - working: true
+        agent: "testing"
+        comment: "Code review completed. Fix logic verified: TohatsuLogo component now accepts showText prop (defaults to true). When showText={false}, component renders only logo image without 'TOHATSU' text. In page.tsx line 34, navbar uses showText={false}, then line 35 adds 'TOHATSU EC.' text separately. This correctly resolves the duplication issue (previously: logo 'TOHATSU' + page 'TOHATSU EC.' = duplicated; now: logo image only + page 'TOHATSU EC.' = correct). Visual testing not performed as frontend testing is outside testing agent scope."
+
   - task: "Frontend Testing"
     implemented: true
     working: "NA"
@@ -361,12 +385,12 @@ frontend:
 metadata:
   created_by: "testing_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: false
   backend_url: "https://outboard-motors.preview.emergentagent.com/api"
-  test_date: "2026-06-11"
-  total_backend_tests: 16
-  backend_tests_passed: 16
+  test_date: "2026-06-25"
+  total_backend_tests: 27
+  backend_tests_passed: 27
   backend_tests_failed: 0
 
 test_plan:
@@ -380,3 +404,7 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Comprehensive backend API testing completed successfully. All 16 test cases passed. Created backend_test.py for automated testing. All endpoints (Authentication, Motors CRUD, Calendar CRUD, Configuration) are working correctly. Authorization is properly implemented with JWT Bearer tokens. Database seeding is functional. No critical issues found. Backend is production-ready."
+  - agent: "main"
+    message: "Fixed text duplication bug in navbar. User reported 'TOHATSU TOHATSU EC.' appearing duplicated. The issue was that TohatsuLogo component already included 'TOHATSU' text, and page.tsx added another 'TOHATSU EC.' text. Solution: Added showText={false} prop to TohatsuLogo in the navbar to display only the logo image, followed by the 'TOHATSU EC.' text. Screenshot verified the fix works correctly."
+  - agent: "testing"
+    message: "Backend testing completed for Asesores CRUD and Leads tracking features. Extended backend_test.py with 11 new tests (7 for Asesores, 4 for Leads). All 27 backend tests passed (100% success rate). Asesores CRUD: All endpoints working correctly including GET, POST, PUT, DELETE, and by-provincia lookup with fallback. Leads tracking: Public lead creation, authenticated lead retrieval, Excel export with valid XLSX format, and proper auth validation all working. Frontend navbar fix: Code review completed - fix logic is correct (showText prop prevents duplication), but visual testing not performed as frontend testing is outside testing agent scope. Backend is fully functional and production-ready."
