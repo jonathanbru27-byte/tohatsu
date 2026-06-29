@@ -464,6 +464,203 @@ async def export_leads_xlsx(current_user: dict = Depends(get_current_user)):
         headers={"Content-Disposition": "attachment; filename=leads_tohatsu.xlsx"},
     )
 
+# ==================== SEED ENDPOINT ====================
+
+# Catálogo completo de motores Tohatsu
+TOHATSU_MOTORS = [
+    {
+        "modelo": "Tohatsu M3.5B",
+        "potencia": "3.5 HP",
+        "hp_value": 3,
+        "tipo": "2 Tiempos",
+        "cilindrada": "74.6 cc",
+        "peso_seco": "13 kg",
+        "sistema": "Arranque manual, CDI",
+        "badge_text": "PORTÁTIL",
+        "caracteristicas": "Motor ultraligero ideal para botes inflables y pequeñas embarcaciones. Sistema de enfriamiento por agua. Tanque de combustible integrado de 1.0L. Altura de popa corta (381mm). Ideal para pesca en lagos y ríos.",
+        "precio": 1250.00,
+        "imagen": "https://images.pexels.com/photos/28170856/pexels-photo-28170856.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 250.00,
+        "financiamiento_cuotas": 24
+    },
+    {
+        "modelo": "Tohatsu MFS6",
+        "potencia": "6 HP",
+        "hp_value": 6,
+        "tipo": "4 Tiempos",
+        "cilindrada": "138 cc",
+        "peso_seco": "26 kg",
+        "sistema": "Arranque manual, EFI disponible",
+        "badge_text": "ECO FRIENDLY",
+        "caracteristicas": "Motor de 4 tiempos silencioso y económico. Bajo consumo de combustible. Sistema de lubricación por cárter húmedo. Tanque externo de 12L incluido. Altura de popa corta/larga disponible. Perfecto para veleros y botes auxiliares.",
+        "precio": 2150.00,
+        "imagen": "https://images.pexels.com/photos/30094170/pexels-photo-30094170.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 430.00,
+        "financiamiento_cuotas": 30
+    },
+    {
+        "modelo": "Tohatsu MFS9.9",
+        "potencia": "9.9 HP",
+        "hp_value": 9,
+        "tipo": "4 Tiempos",
+        "cilindrada": "209 cc",
+        "peso_seco": "38 kg",
+        "sistema": "Arranque manual/eléctrico, EFI",
+        "badge_text": "BEST SELLER",
+        "caracteristicas": "El motor más vendido de la gama. Inyección electrónica EFI para máxima eficiencia. Alternador de 12V/6A. Sistema de alerta de sobrecalentamiento. Ideal para botes de aluminio y fibra hasta 4m. No requiere licencia náutica en muchos países.",
+        "precio": 3200.00,
+        "imagen": "https://images.pexels.com/photos/9592461/pexels-photo-9592461.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 640.00,
+        "financiamiento_cuotas": 30
+    },
+    {
+        "modelo": "Tohatsu M9.8",
+        "potencia": "9.8 HP",
+        "hp_value": 9,
+        "tipo": "2 Tiempos",
+        "cilindrada": "169 cc",
+        "peso_seco": "26 kg",
+        "sistema": "Arranque manual, CDI",
+        "badge_text": "CLÁSICO",
+        "caracteristicas": "Motor 2 tiempos de probada confiabilidad. Relación peso-potencia excepcional. Sistema de mezcla de aceite automático opcional. Diseño compacto y fácil mantenimiento. Popular entre pescadores profesionales.",
+        "precio": 2650.00,
+        "imagen": "https://images.pexels.com/photos/16135856/pexels-photo-16135856.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 530.00,
+        "financiamiento_cuotas": 30
+    },
+    {
+        "modelo": "Tohatsu MX18",
+        "potencia": "18 HP",
+        "hp_value": 18,
+        "tipo": "4 Tiempos EFI",
+        "cilindrada": "333 cc",
+        "peso_seco": "45 kg",
+        "sistema": "Arranque eléctrico, EFI, Power Trim",
+        "badge_text": "NUEVO 2025",
+        "caracteristicas": "Nueva generación de motores Tohatsu. Sistema EFI de última generación. Power Trim & Tilt eléctrico. Alternador de 12V/12A. Sistema de diagnóstico digital. Garantía extendida de 5 años. Ideal para botes de pesca deportiva.",
+        "precio": 4350.00,
+        "imagen": "https://images.pexels.com/photos/32967413/pexels-photo-32967413.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 870.00,
+        "financiamiento_cuotas": 36
+    },
+    {
+        "modelo": "Tohatsu MX30",
+        "potencia": "30 HP",
+        "hp_value": 30,
+        "tipo": "4 Tiempos EFI",
+        "cilindrada": "526 cc",
+        "peso_seco": "72 kg",
+        "sistema": "Arranque eléctrico, EFI, Power Trim",
+        "badge_text": "JAPAN TECH",
+        "caracteristicas": "Motor de media potencia con tecnología japonesa de punta. Inyección multipunto. Sistema de enfriamiento de doble circuito. Caja de cambios Forward-Neutral-Reverse. Compatible con control remoto. Excelente para lanchas de hasta 5.5m.",
+        "precio": 5850.00,
+        "imagen": "https://images.pexels.com/photos/14815453/pexels-photo-14815453.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 1170.00,
+        "financiamiento_cuotas": 36
+    },
+    {
+        "modelo": "Tohatsu MFS30",
+        "potencia": "30 HP",
+        "hp_value": 30,
+        "tipo": "4 Tiempos",
+        "cilindrada": "526 cc",
+        "peso_seco": "68 kg",
+        "sistema": "Arranque manual/eléctrico, Carburador",
+        "badge_text": "CONFIABLE",
+        "caracteristicas": "Motor 4 tiempos de la serie MFS. Sistema de carburador de alto rendimiento. Excelente relación calidad-precio. Bajo mantenimiento. Alternador de 12V/10A. Power Tilt manual. Ideal para uso recreativo y pesca artesanal.",
+        "precio": 5200.00,
+        "imagen": "https://images.pexels.com/photos/847393/pexels-photo-847393.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 1040.00,
+        "financiamiento_cuotas": 36
+    },
+    {
+        "modelo": "Tohatsu MX40",
+        "potencia": "40 HP",
+        "hp_value": 40,
+        "tipo": "4 Tiempos EFI",
+        "cilindrada": "866 cc",
+        "peso_seco": "87 kg",
+        "sistema": "Arranque eléctrico, EFI, Power Trim & Tilt",
+        "badge_text": "PRO SERIES",
+        "caracteristicas": "Motor profesional para uso intensivo. 3 cilindros en línea. Sistema TLDI de inyección directa disponible. Alternador de alta capacidad 12V/18A. Sistema de alerta múltiple (temperatura, presión de aceite, RPM). Ideal para pesca comercial y turismo náutico.",
+        "precio": 7950.00,
+        "imagen": "https://images.pexels.com/photos/8669061/pexels-photo-8669061.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 1590.00,
+        "financiamiento_cuotas": 48
+    },
+    {
+        "modelo": "Tohatsu MX50",
+        "potencia": "50 HP",
+        "hp_value": 50,
+        "tipo": "4 Tiempos EFI",
+        "cilindrada": "866 cc",
+        "peso_seco": "93 kg",
+        "sistema": "Arranque eléctrico, EFI, Power Trim & Tilt, TLDI",
+        "badge_text": "PREMIUM",
+        "caracteristicas": "Tope de gama de la serie MX. Máxima potencia y eficiencia. Sistema TLDI de inyección directa estratificada. Menor consumo y emisiones. Tecnología Variable Valve Timing. Control digital con pantalla multifunción opcional. Garantía premium de 5 años. Para embarcaciones de hasta 6.5m.",
+        "precio": 9500.00,
+        "imagen": "https://images.pexels.com/photos/9381649/pexels-photo-9381649.jpeg?auto=compress&cs=tinysrgb&w=600",
+        "financiamiento_entrada": 1900.00,
+        "financiamiento_cuotas": 48
+    }
+]
+
+SEED_KEY = os.environ.get('SEED_KEY', 'tohatsu2025seed')
+
+@api_router.post("/seed")
+async def run_seed(key: str = None):
+    """Ejecuta el seed de la base de datos. Requiere clave de seguridad."""
+    if key != SEED_KEY:
+        raise HTTPException(status_code=403, detail="Clave de seed inválida")
+    
+    try:
+        # Seed motors
+        await db.motors.delete_many({})
+        result = await db.motors.insert_many(TOHATSU_MOTORS)
+        motors_count = len(result.inserted_ids)
+        
+        # Seed admin
+        admin = await db.admins.find_one({"username": "admin"})
+        admin_created = False
+        if not admin:
+            await db.admins.insert_one({
+                "username": "admin",
+                "password": pwd_context.hash("admin123")
+            })
+            admin_created = True
+        
+        # Seed config
+        config = await db.configuracion.find_one({})
+        config_created = False
+        if not config:
+            await db.configuracion.insert_one({
+                "whatsapp_ventas": "593999999999",
+                "whatsapp_repuestos": "593988888888",
+                "whatsapp_servicio": "593977777777"
+            })
+            config_created = True
+        
+        return {
+            "success": True,
+            "message": "Seed ejecutado correctamente",
+            "motors_inserted": motors_count,
+            "admin_created": admin_created,
+            "config_created": config_created
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error ejecutando seed: {str(e)}")
+
+@api_router.get("/seed")
+async def seed_info():
+    """Información sobre el endpoint de seed"""
+    return {
+        "endpoint": "/api/seed",
+        "method": "POST",
+        "description": "Ejecuta el seed de la base de datos",
+        "usage": "POST /api/seed?key=TU_CLAVE_DE_SEED",
+        "note": "La clave por defecto es 'tohatsu2025seed' o configura SEED_KEY en las variables de entorno"
+    }
+
 app.include_router(api_router)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
