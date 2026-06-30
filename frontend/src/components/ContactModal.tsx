@@ -58,11 +58,13 @@ export function ContactModal({ open, onClose, title, phoneNumber, interes, detal
     // 2. Resolver asesor de la provincia o fallback general
     let asesorWhatsapp = phoneNumber;
     let asesorNombre = '';
-    try {
-      const asesor = await getAsesorByProvincia(provincia);
-      if (asesor?.whatsapp) {
-        asesorWhatsapp = asesor.whatsapp;
-        asesorNombre = asesor.nombre || '';
+try {
+      if (interes === 'motor') {
+        const asesor = await getAsesorByProvincia(provincia);
+        if (asesor?.whatsapp) {
+          asesorWhatsapp = asesor.whatsapp;
+          asesorNombre = asesor.nombre || '';
+        }
       }
     } catch {}
 
