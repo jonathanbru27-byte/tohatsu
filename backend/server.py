@@ -94,6 +94,7 @@ class Repuesto(BaseModel):
     imagen: str = ""
     categoria: str = "General"
     stock: int = 0
+    modelos_compatibles: str = ""
 
 class RepuestoCreate(BaseModel):
     nombre: str
@@ -102,6 +103,7 @@ class RepuestoCreate(BaseModel):
     imagen: str = ""
     categoria: str = "General"
     stock: int = 0
+    modelos_compatibles: str = ""
 
 class Asesor(BaseModel):
     id: Optional[str] = None
