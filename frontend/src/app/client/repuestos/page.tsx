@@ -76,6 +76,11 @@ export default function RepuestosPage() {
                 <div className="flex flex-1 flex-col gap-1.5 p-3">
                   <p className="line-clamp-2 text-[13px] font-bold text-brand-navy">{r.nombre}</p>
                   <p className="text-[10px] uppercase tracking-wide text-slate-400">{r.categoria || 'General'}</p>
+                  {r.modelos_compatibles && (
+  <p className="text-[10px] text-slate-500">
+    <span className="font-bold">Modelos:</span> {r.modelos_compatibles}
+  </p>
+)}
                   <p className="text-[15px] font-extrabold text-brand-red">{formatCurrency(r.precio)}</p>
                   <button
                     onClick={() => setSelected(r)}
