@@ -67,6 +67,7 @@ export interface Repuesto {
   imagen?: string;
   categoria?: string;
   stock?: number;
+  modelos_compatibles?: string;
 }
 
 export interface CalendarioEvento {
