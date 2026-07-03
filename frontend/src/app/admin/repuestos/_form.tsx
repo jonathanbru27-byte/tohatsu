@@ -18,7 +18,7 @@ export function RepuestoFormPage({ mode }: Props) {
   const [loading, setLoading] = useState(mode === 'edit');
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    nombre: '', descripcion: '', precio: '', imagen: '', categoria: 'General', stock: '0',
+   nombre: '', descripcion: '', precio: '', imagen: '', categoria: 'General', stock: '0', modelos_compatibles: '',
   });
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -28,7 +28,7 @@ export function RepuestoFormPage({ mode }: Props) {
         const r = all.find((x) => x.id === id);
         if (r) setForm({
           nombre: r.nombre, descripcion: r.descripcion, precio: String(r.precio),
-          imagen: r.imagen || '', categoria: r.categoria || 'General', stock: String(r.stock || 0),
+          imagen: r.imagen || '', categoria: r.categoria || 'General', stock: String(r.stock || 0), modelos_compatibles: r.modelos_compatibles || '',
         });
       }).catch(() => toast.error('No se pudo cargar')).finally(() => setLoading(false));
     }
@@ -46,6 +46,7 @@ export function RepuestoFormPage({ mode }: Props) {
         nombre: form.nombre, descripcion: form.descripcion,
         precio: parseFloat(form.precio), imagen: form.imagen, categoria: form.categoria,
         stock: parseInt(form.stock) || 0,
+modelos_compatibles: form.modelos_compatibles,
       };
       if (mode === 'edit' && id) await updateRepuesto(id, payload);
       else await createRepuesto(payload);
@@ -88,6 +89,7 @@ export function RepuestoFormPage({ mode }: Props) {
             })}
           </div>
         </div>
+        <div><label className="label">Modelos compatibles</label><input className="input mt-1" value={form.modelos_compatibles} onChange={(e) => set('modelos_compatibles', e.target.value)} placeholder="Ej: MFS30, MFS40, MX40" /></div>
 
         <div><label className="label">Stock disponible</label><input className="input mt-1" type="number" value={form.stock} onChange={(e) => set('stock', e.target.value)} placeholder="25" /></div>
 
