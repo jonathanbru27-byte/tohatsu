@@ -95,6 +95,7 @@ class Repuesto(BaseModel):
     categoria: str = "General"
     stock: int = 0
     modelos_compatibles: str = ""
+    codigo: str = ""
 
 class RepuestoCreate(BaseModel):
     nombre: str
@@ -104,6 +105,7 @@ class RepuestoCreate(BaseModel):
     categoria: str = "General"
     stock: int = 0
     modelos_compatibles: str = ""
+    codigo: str = ""
 
 class Asesor(BaseModel):
     id: Optional[str] = None
