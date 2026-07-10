@@ -120,7 +120,7 @@ export default function MotorDetailPage() {
           <h3 className="text-[13px] font-extrabold tracking-widest text-brand-navy">DISPONIBLE EN</h3>
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/dsyFHSvy/Gemini-Generated-Image-ipkaaqipkaaqipka.png"La Ganga" className="h-16 object-contain" />
+              <img src="https://i.ibb.co/dsyFHSvy/Gemini-Generated-Image-ipkaaqipkaaqipka.png" alt="La Ganga" className="h-16 object-contain" />
             </div>
             <div className="card flex items-center justify-center p-3">
               <img src="https://https://i.ibb.co/4R0ZcnZk/Gemini-Generated-Image-2xtr0t2xtr0t2xtr.png" alt="Al Precio" className="h-16 object-contain" />
