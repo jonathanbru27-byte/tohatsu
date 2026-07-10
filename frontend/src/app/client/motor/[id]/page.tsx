@@ -120,16 +120,16 @@ export default function MotorDetailPage() {
           <h3 className="text-[13px] font-extrabold tracking-widest text-brand-navy">DISPONIBLE EN</h3>
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/Y7Mghykj/la-ganga.png" alt="La Ganga" className="h-16 object-contain" />
+              <img src="https://i.ibb.co/dsyFHSvy/Gemini-Generated-Image-ipkaaqipkaaqipka.png"La Ganga" className="h-16 object-contain" />
             </div>
             <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/SwdQ3HB9/al-precio.png" alt="Al Precio" className="h-16 object-contain" />
+              <img src="https://https://i.ibb.co/4R0ZcnZk/Gemini-Generated-Image-2xtr0t2xtr0t2xtr.png" alt="Al Precio" className="h-16 object-contain" />
             </div>
             <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/ymkp5GL1/crecos.png" alt="Crecos" className="h-16 object-contain" />
+              <img src="https://i.ibb.co/BH0RKZRb/Gemini-Generated-Image-7h7ofb7h7ofb7h7o.png" alt="Crecos" className="h-16 object-contain" />
             </div>
             <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/V0QfbHfh/artefacta.png" alt="Artefacta" className="h-16 object-contain" />
+              <img src="https://i.ibb.co/ch5y3RGy/Gemini-Generated-Image-h4fpn3h4fpn3h4fp.png" alt="Artefacta" className="h-16 object-contain" />
             </div>
           </div>
         </div>
