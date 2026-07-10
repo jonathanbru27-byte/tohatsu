@@ -151,8 +151,8 @@ export default function MotorDetailPage() {
         className="max-w-full max-h-full object-contain" 
       />
     </div>
-
-  </div>
+    </div>
+ </div>
 </div>
 
       {/* Sticky CTA */}
