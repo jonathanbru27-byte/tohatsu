@@ -133,6 +133,7 @@ export default function MotorDetailPage() {
             </div>
           </div>
         </div>
+      </div>
 
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-1/2 z-30 w-full max-w-[480px] -translate-x-1/2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur">
