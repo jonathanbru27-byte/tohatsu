@@ -116,24 +116,44 @@ export default function MotorDetailPage() {
         )}
 
         {/* Distribuidores autorizados */}
-        <div className="mt-7">
-          <h3 className="text-[13px] font-extrabold tracking-widest text-brand-navy">DISPONIBLE EN</h3>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/dsyFHSvy/Gemini-Generated-Image-ipkaaqipkaaqipka.png" alt="La Ganga" className="h-16 object-contain" />
-            </div>
-            <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/4R0ZcnZk/Gemini-Generated-Image-2xtr0t2xtr0t2xtr.png" alt="Al Precio" className="h-16 object-contain" />
-            </div>
-            <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/BH0RKZRb/Gemini-Generated-Image-7h7ofb7h7ofb7h7o.png" alt="Crecos" className="h-16 object-contain" />
-            </div>
-            <div className="card flex items-center justify-center p-3">
-              <img src="https://i.ibb.co/ch5y3RGy/Gemini-Generated-Image-h4fpn3h4fpn3h4fp.png" alt="Artefacta" className="h-16 object-contain" />
-            </div>
-          </div>
-        </div>
-      </div>
+<div className="mt-7">
+  <h3 className="text-[13px] font-extrabold tracking-widest text-brand-navy">DISPONIBLE EN</h3>
+  <div className="mt-3 grid grid-cols-2 gap-3">
+    
+    <div className="card flex items-center justify-center p-3 h-24">
+      <img 
+        src="https://i.ibb.co/dsyFHSvy/Gemini-Generated-Image-ipkaaqipkaaqipka.png" 
+        alt="La Ganga" 
+        className="max-w-full max-h-full object-contain" 
+      />
+    </div>
+    
+    <div className="card flex items-center justify-center p-3 h-24">
+      <img 
+        src="https://i.ibb.co/4R0ZcnZk/Gemini-Generated-Image-2xtr0t2xtr0t2xtr.png" 
+        alt="Al Precio" 
+        className="max-w-full max-h-full object-contain" 
+      />
+    </div>
+    
+    <div className="card flex items-center justify-center p-3 h-24">
+      <img 
+        src="https://i.ibb.co/BH0RKZRb/Gemini-Generated-Image-7h7ofb7h7ofb7h7o.png" 
+        alt="Crecos" 
+        className="max-w-full max-h-full object-contain" 
+      />
+    </div>
+    
+    <div className="card flex items-center justify-center p-3 h-24">
+      <img 
+        src="https://i.ibb.co/ch5y3RGy/Gemini-Generated-Image-h4fpn3h4fpn3h4fp.png" 
+        alt="Artefacta" 
+        className="max-w-full max-h-full object-contain" 
+      />
+    </div>
+
+  </div>
+</div>
 
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-1/2 z-30 w-full max-w-[480px] -translate-x-1/2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur">
