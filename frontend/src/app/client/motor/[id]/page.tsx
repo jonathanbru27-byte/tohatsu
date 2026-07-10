@@ -146,7 +146,7 @@ export default function MotorDetailPage() {
     
     <div className="card flex items-center justify-center p-3 h-24">
       <img 
-        src="https://i.ibb.co/ch5y3RGy/Gemini-Generated-Image-h4fpn3h4fpn3h4fp.png" 
+        src="https://i.ibb.co/Tqdd4B5g/Gemini-Generated-Image-fagmzzfagmzzfagm.png" 
         alt="Artefacta" 
         className="max-w-full max-h-full object-contain" 
       />
