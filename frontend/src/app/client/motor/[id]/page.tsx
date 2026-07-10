@@ -114,7 +114,25 @@ export default function MotorDetailPage() {
             <p className="mt-3 whitespace-pre-line text-[14px] leading-relaxed text-slate-700">{motor.caracteristicas}</p>
           </>
         )}
-      </div>
+
+        {/* Distribuidores autorizados */}
+        <div className="mt-7">
+          <h3 className="text-[13px] font-extrabold tracking-widest text-brand-navy">DISPONIBLE EN</h3>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="card flex items-center justify-center p-3">
+              <img src="https://i.ibb.co/Y7Mghykj/la-ganga.png" alt="La Ganga" className="h-10 object-contain" />
+            </div>
+            <div className="card flex items-center justify-center p-3">
+              <img src="https://i.ibb.co/SwdQ3HB9/al-precio.png" alt="Al Precio" className="h-10 object-contain" />
+            </div>
+            <div className="card flex items-center justify-center p-3">
+              <img src="https://i.ibb.co/ymkp5GL1/crecos.png" alt="Crecos" className="h-10 object-contain" />
+            </div>
+            <div className="card flex items-center justify-center p-3">
+              <img src="https://i.ibb.co/V0QfbHfh/artefacta.png" alt="Artefacta" className="h-10 object-contain" />
+            </div>
+          </div>
+        </div>
 
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-1/2 z-30 w-full max-w-[480px] -translate-x-1/2 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur">
