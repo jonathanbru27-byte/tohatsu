@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Megaphone, Clock, MapPin, ChevronRight, Anchor, Wrench, Phone, Calendar } from 'lucide-react';
-import { getMotors, getCalendar, type Motor, type CalendarioEvento } from '@/lib/api';
+import { ArrowRight, Megaphone, Clock, MapPin, ChevronRight, Anchor, Wrench, Phone, Calendar, Package } from 'lucide-react';
+import { getMotors, getCalendar, getRepuestos, type Motor, type CalendarioEvento, type Repuesto } from '@/lib/api';
 import { MES_NAMES_SHORT, formatCurrency, cn } from '@/lib/utils';
 import { TohatsuLogo } from '@/components/TohatsuLogo';
 
 export default function HomePage() {
   const [motors, setMotors] = useState<Motor[]>([]);
+  const [repuestos, setRepuestos] = useState<Repuesto[]>([]);
   const [eventos, setEventos] = useState<CalendarioEvento[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getMotors(), getCalendar()])
-      .then(([m, ev]) => {
+    Promise.all([getMotors(), getCalendar(), getRepuestos()])
+      .then(([m, ev, r]) => {
         setMotors(m.slice(0, 6));
+        setRepuestos(r.slice(0, 8));
         const today = new Date().toISOString().split('T')[0];
         setEventos(ev.filter((e) => e.fecha >= today).sort((a, b) => a.fecha.localeCompare(b.fecha)));
       })
@@ -151,6 +153,42 @@ export default function HomePage() {
             <ArrowRight size={18} className="text-brand-navy" />
           </div>
         </Link>
+
+        <div className="section-title mt-7">
+          <span className="text-[13px] font-extrabold tracking-widest text-brand-navy">REPUESTOS DESTACADOS</span>
+        </div>
+
+        {loading ? (
+          <div className="my-10 flex justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-red border-t-transparent" />
+          </div>
+        ) : repuestos.length === 0 ? null : (
+          <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto pb-2">
+            {repuestos.map((r) => (
+              <Link
+                key={r.id}
+                href="/client/repuestos"
+                className="card relative shrink-0 overflow-hidden"
+                style={{ width: 130 }}
+                data-testid={`featured-repuesto-${r.id}`}
+              >
+                {r.imagen ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={r.imagen} alt={r.nombre} className="aspect-square w-full bg-slate-100 object-cover" />
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center bg-slate-100">
+                    <Package size={26} className="text-slate-300" />
+                  </div>
+                )}
+                <div className="p-2.5">
+                  <p className="line-clamp-2 text-[12px] font-bold text-brand-navy">{r.nombre}</p>
+                  {r.codigo && <p className="mt-0.5 text-[9px] text-slate-400 font-mono">{r.codigo}</p>}
+                  <p className="mt-1 text-[14px] font-extrabold text-brand-red">{formatCurrency(r.precio)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className="section-title mt-7">
           <span className="text-[13px] font-extrabold tracking-widest text-brand-navy">MODELOS DESTACADOS</span>
