@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Megaphone, Clock, MapPin, ChevronRight, Anchor, Wrench, Phone, Calendar, Package } from 'lucide-react';
 import { getMotors, getCalendar, getRepuestos, type Motor, type CalendarioEvento, type Repuesto } from '@/lib/api';
 import { MES_NAMES_SHORT, formatCurrency, cn } from '@/lib/utils';
@@ -173,8 +174,15 @@ export default function HomePage() {
                 data-testid={`featured-repuesto-${r.id}`}
               >
                 {r.imagen ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={r.imagen} alt={r.nombre} className="aspect-square w-full bg-slate-100 object-cover" />
+                  <div className="relative aspect-square w-full bg-slate-100">
+                    <Image
+                      src={r.imagen}
+                      alt={r.nombre}
+                      fill
+                      sizes="130px"
+                      className="object-cover"
+                    />
+                  </div>
                 ) : (
                   <div className="flex aspect-square w-full items-center justify-center bg-slate-100">
                     <Package size={26} className="text-slate-300" />
@@ -208,8 +216,15 @@ export default function HomePage() {
                 style={{ width: 180 }}
                 data-testid={`featured-${m.id}`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.imagen} alt={m.modelo} className="aspect-[4/5] w-full bg-slate-200 object-cover" />
+                <div className="relative aspect-[4/5] w-full bg-slate-200">
+                  <Image
+                    src={m.imagen}
+                    alt={m.modelo}
+                    fill
+                    sizes="180px"
+                    className="object-cover"
+                  />
+                </div>
                 <span className="absolute right-2 top-2 rounded-md bg-brand-red px-2.5 py-1 text-[11px] font-extrabold text-white">
                   {m.potencia}
                 </span>
@@ -226,3 +241,4 @@ export default function HomePage() {
     </div>
   );
 }
+
