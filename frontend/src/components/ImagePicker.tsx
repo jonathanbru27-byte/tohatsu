@@ -1,37 +1,44 @@
 'use client';
 
-import { useRef } from 'react';
-import { Camera, RefreshCw } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Camera, RefreshCw, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { uploadImage } from '@/lib/api';
 
 interface Props {
   value: string;
-  onChange: (base64: string) => void;
+  onChange: (url: string) => void;
   aspectRatio?: '4/5' | '1/1' | '16/9';
   className?: string;
   testID?: string;
 }
 
 /**
- * Web image picker that reads a file via FileReader -> base64 data URL.
- * Compresses (down-scales) large images client-side using a canvas to keep base64
- * payload reasonable.
+ * Image picker that compresses client-side, uploads to ImgBB via backend,
+ * and stores only the hosted URL.
  */
 export function ImagePicker({ value, onChange, aspectRatio = '4/5', className, testID }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     if (!file) return;
     if (file.size > 8 * 1024 * 1024) {
       toast.error('La imagen es demasiado grande (máx 8MB)');
       return;
     }
+
+    // 1. Leer archivo como base64
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.readAsDataURL(file);
+
+    reader.onload = async () => {
       const src = reader.result as string;
+
+      // 2. Comprimir con canvas
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const MAX = 900;
         let { width, height } = img;
         if (width > MAX || height > MAX) {
@@ -44,17 +51,27 @@ export function ImagePicker({ value, onChange, aspectRatio = '4/5', className, t
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          onChange(src);
+          toast.error('Error procesando imagen');
           return;
         }
         ctx.drawImage(img, 0, 0, width, height);
         const compressed = canvas.toDataURL('image/jpeg', 0.72);
-        onChange(compressed);
+
+        // 3. Subir a ImgBB vía backend
+        setUploading(true);
+        try {
+          const url = await uploadImage(compressed);
+          onChange(url);
+          toast.success('Imagen subida correctamente');
+        } catch (err: any) {
+          toast.error(err?.response?.data?.detail || 'Error subiendo imagen');
+        } finally {
+          setUploading(false);
+        }
       };
-      img.onerror = () => onChange(src);
+      img.onerror = () => toast.error('Error leyendo imagen');
       img.src = src;
     };
-    reader.readAsDataURL(file);
   };
 
   const aspectClass =
@@ -77,14 +94,21 @@ export function ImagePicker({ value, onChange, aspectRatio = '4/5', className, t
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
+        disabled={uploading}
         className={cn(
           'group relative w-full overflow-hidden rounded-2xl',
           aspectClass,
           !value && 'border-2 border-dashed border-brand-navy bg-blue-50',
+          uploading && 'opacity-70 cursor-wait',
           className
         )}
       >
-        {value ? (
+        {uploading ? (
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-brand-navy">
+            <Loader2 size={42} className="animate-spin" />
+            <span className="text-sm font-semibold">Subiendo...</span>
+          </div>
+        ) : value ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={value} alt="preview" className="absolute inset-0 h-full w-full object-cover" />
