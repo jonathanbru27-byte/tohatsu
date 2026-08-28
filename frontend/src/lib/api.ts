@@ -166,5 +166,9 @@ export const downloadLeadsExcel = async () => {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 };
-
+// ===================== UPLOAD IMAGE =====================
+export const uploadImage = async (base64Image: string): Promise<string> => {
+  const { data } = await api.post('/upload-image', { image: base64Image });
+  return data.url;
+};
 export default api;
