@@ -46,3 +46,4 @@ certifi==2026.5.20
 
 # Other utilities
 click==8.4.1
+requests==2.32.3
