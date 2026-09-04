@@ -664,6 +664,7 @@ async def seed_info():
         "usage": "POST /api/seed?key=TU_CLAVE_DE_SEED",
         "note": "La clave por defecto es 'tohatsu2025seed' o configura SEED_KEY en las variables de entorno"
     }
+import traceback
 import requests
 
 class ImageUploadRequest(BaseModel):
@@ -671,32 +672,43 @@ class ImageUploadRequest(BaseModel):
 
 @api_router.post("/upload-image")
 async def upload_image(data: ImageUploadRequest):
-    """
-    Recibe una imagen en base64, la sube a ImgBB y devuelve la URL pública.
-    """
-    IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "")
-    if not IMGBB_API_KEY:
-        raise HTTPException(status_code=500, detail="IMGBB_API_KEY no configurada en el servidor")
-    
-    base64_string = data.image
-    if "," in base64_string:
-        b64_clean = base64_string.split(",", 1)[1]
-    else:
-        b64_clean = base64_string
-    
-    url = "https://api.imgbb.com/1/upload"
-    payload = {"key": IMGBB_API_KEY, "image": b64_clean}
-    
     try:
+        """
+        Recibe una imagen en base64, la sube a ImgBB y devuelve la URL pública.
+        """
+        IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "")
+        
+        # Agregamos un print para que Render lo muestre en la consola
+        if not IMGBB_API_KEY:
+            print("===== ERROR: FALTA IMGBB_API_KEY EN RENDER =====")
+            raise HTTPException(status_code=500, detail="IMGBB_API_KEY no configurada en el servidor")
+        
+        base64_string = data.image
+        if "," in base64_string:
+            b64_clean = base64_string.split(",", 1)[1]
+        else:
+            b64_clean = base64_string
+        
+        url = "https://api.imgbb.com/1/upload"
+        payload = {"key": IMGBB_API_KEY, "image": b64_clean}
+        
         response = requests.post(url, data=payload, timeout=60)
         response.raise_for_status()
         result = response.json()
+        
         if result.get("success"):
             return {"url": result["data"]["url"]}
         else:
             error_msg = result.get("error", {}).get("message", "Error desconocido de ImgBB")
+            print(f"===== ERROR DE IMGBB: {error_msg} =====")
             raise HTTPException(status_code=400, detail=error_msg)
+            
     except Exception as e:
+        # AQUÍ CAPTURAMOS Y MOSTRAMOS CUALQUIER OTRO ERROR REAL EN LA CONSOLA DE RENDER
+        print("===== ERROR CRÍTICO EN UPLOAD-IMAGE =====")
+        print(f"Mensaje: {str(e)}")
+        traceback.print_exc()
+        print("=========================================")
         raise HTTPException(status_code=500, detail=f"Error subiendo imagen: {str(e)}")
 app.include_router(api_router)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
