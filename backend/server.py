@@ -338,10 +338,17 @@ async def get_repuesto(repuesto_id: str):
 
 @api_router.post("/repuestos", response_model=Repuesto)
 async def create_repuesto(repuesto: RepuestoCreate, current_user: dict = Depends(get_current_user)):
-    rd = repuesto.dict()
-    result = await db.repuestos.insert_one(rd)
-    rd["id"] = str(result.inserted_id)
-    return Repuesto(**rd)
+    try:
+        rd = repuesto.dict()
+        result = await db.repuestos.insert_one(rd)
+        rd["id"] = str(result.inserted_id)
+        return Repuesto(**rd)
+    except Exception as e:
+        print("===== ERROR AL CREAR REPUESTO =====")
+        print(f"Mensaje: {str(e)}")
+        traceback.print_exc()
+        print("===================================")
+        raise HTTPException(status_code=500, detail=f"Error guardando repuesto: {str(e)}")
 
 @api_router.put("/repuestos/{repuesto_id}", response_model=Repuesto)
 async def update_repuesto(repuesto_id: str, repuesto: RepuestoCreate, current_user: dict = Depends(get_current_user)):
